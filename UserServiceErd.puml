@@ -1,0 +1,38 @@
+@startuml UserServiceErd
+
+hide circle
+skinparam linetype ortho
+
+entity "Пользователи (Users)" as users {
+    * id : VARCHAR(36) <<PK>>
+    --
+    * uid : VARCHAR(10) <<unique>>
+    * nickname : VARCHAR(50)
+    * email : VARCHAR(128) <<unique>>
+      avatar_url : VARCHAR(255) <<default "/путь до дефолтного аватара">>
+    * gender : ENUM("Мужской", "Женский")
+    * status : ENUM("В сети", "Не активен", "Не беспокоить", "Не в сети")
+    * date_of_birth : DATE
+      account_creation_date : TIMESTAMP <<default CURRENT_TIMESTAMP>>
+}
+
+'Возможные доп поля: "о себе", дата последнего логина
+
+entity "Друзья (Friends)" as friends {
+    * user_id : VARCHAR(36) <<PK>> <<FK>>
+    * friend_id : VARCHAR(36) <<PK>> <<FK>>
+    --
+      status : ENUM("Заявка отправлена", "Друг", "Заявка отклонена") <<default "Заявка отправлена">>
+}
+
+entity "Враги (Enemies)" as enemies {
+    * user_id : VARCHAR(36) <<PK>> <<FK>>
+    * enemy_id : VARCHAR(36) <<PK>> <<FK>>
+}
+
+users ||--o{ friends : user
+users ||--o{ friends : friend
+users ||--o{ enemies : user
+users ||--o{ enemies : enemy
+
+@enduml
