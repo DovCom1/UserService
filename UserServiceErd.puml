@@ -33,17 +33,5 @@ users ||--o{ friends : friend <<ON DELETE CASCADE>>
 users ||--o{ enemies : user <<ON DELETE CASCADE>>
 users ||--o{ enemies : enemy <<ON DELETE CASCADE>>
 
-CREATE OR REPLACE FUNCTION prevent_account_creation_date_update() RETURNS TRIGGER AS $$
-BEGIN
-  IF NEW.account_creation_date != OLD.account_creation_date THEN
-    RAISE EXCEPTION 'It is forbidden to change the date of creation of the account.';
-  END IF;
-  RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
-
-CREATE TRIGGER protect_account_creation_date
-BEFORE UPDATE OF account_creation_date ON users
-FOR EACH ROW EXECUTE FUNCTION prevent_account_creation_date_update();
 
 @enduml

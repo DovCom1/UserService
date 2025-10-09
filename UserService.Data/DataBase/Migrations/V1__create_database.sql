@@ -7,7 +7,7 @@
     gender SMALLINT NOT NULL CHECK (gender in (1, 2)), -- 1=Мужской, 2=Женский
     status SMALLINT NOT NULL CHECK (status in (1, 2, 3, 4)), -- 1=В сети, 2=Не активен, 3=Не беспокоить, 4=Не в сети
     date_of_birth DATE NOT NULL,
-    account_creation_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    account_creation_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE INDEX idx_users_nickname ON users(nickname);
@@ -30,3 +30,16 @@ CREATE TABLE IF NOT EXISTS enemies (
     PRIMARY KEY (user_id, enemy_id),
     CHECK (user_id != enemy_id)
 );
+
+CREATE OR REPLACE FUNCTION prevent_account_creation_date_update() RETURNS TRIGGER AS $$
+BEGIN
+    IF NEW.account_creation_date != OLD.account_creation_date THEN
+        RAISE EXCEPTION 'It is forbidden to change the date of creation of the account.';
+    END IF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER protect_account_creation_date
+BEFORE UPDATE OF account_creation_date ON users
+FOR EACH ROW EXECUTE FUNCTION prevent_account_creation_date_update();
