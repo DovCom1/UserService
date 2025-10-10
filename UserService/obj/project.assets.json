@@ -13,11 +13,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "R:\\Repositories\\UserService\\UserService\\UserService.csproj",
+      "projectUniqueName": "C:\\Repositories\\UserService\\UserService\\UserService.csproj",
       "projectName": "UserService",
-      "projectPath": "R:\\Repositories\\UserService\\UserService\\UserService.csproj",
+      "projectPath": "C:\\Repositories\\UserService\\UserService\\UserService.csproj",
       "packagesPath": "C:\\Users\\Serpen\\.nuget\\packages\\",
-      "outputPath": "R:\\Repositories\\UserService\\UserService\\obj\\",
+      "outputPath": "C:\\Repositories\\UserService\\UserService\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "C:\\Users\\Serpen\\AppData\\Roaming\\NuGet\\NuGet.Config"
@@ -64,7 +64,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.305/PortableRuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.304/PortableRuntimeIdentifierGraph.json"
       }
     }
   }
