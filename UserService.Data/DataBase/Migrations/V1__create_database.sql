@@ -23,6 +23,7 @@ CREATE TABLE IF NOT EXISTS friends (
 
 CREATE INDEX idx_friends_status ON friends(status);
 CREATE INDEX idx_friends_user_id_status ON friends(user_id, status);
+CREATE INDEX idx_friends_friend_id_status ON friends(friend_id, status);
 
 CREATE TABLE IF NOT EXISTS enemies (
     user_id UUID REFERENCES users(id) ON DELETE CASCADE,

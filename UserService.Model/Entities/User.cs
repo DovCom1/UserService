@@ -11,6 +11,6 @@ public class User
     public short Status { get; set; }
     public DateOnly DateOfBirth { get; set; }
     public DateTime AccountCreationTime { get; set; }
-    public ICollection<User> Friends { get; set; }
-    public ICollection<User> Enemies { get; set; }
+    public ICollection<FriendUser> Friends { get; set; }
+    public ICollection<EnemyUser> Enemies { get; set; }
 }

@@ -641,11 +641,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Repositories\\UserService\\UserService.Data\\UserService.Data.csproj",
+      "projectUniqueName": "R:\\Repositories\\UserService\\UserService.Data\\UserService.Data.csproj",
       "projectName": "UserService.Data",
-      "projectPath": "C:\\Repositories\\UserService\\UserService.Data\\UserService.Data.csproj",
+      "projectPath": "R:\\Repositories\\UserService\\UserService.Data\\UserService.Data.csproj",
       "packagesPath": "C:\\Users\\Serpen\\.nuget\\packages\\",
-      "outputPath": "C:\\Repositories\\UserService\\UserService.Data\\obj\\",
+      "outputPath": "R:\\Repositories\\UserService\\UserService.Data\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "C:\\Users\\Serpen\\AppData\\Roaming\\NuGet\\NuGet.Config"
@@ -660,8 +660,8 @@
         "net9.0": {
           "targetAlias": "net9.0",
           "projectReferences": {
-            "C:\\Repositories\\UserService\\UserService.Model\\UserService.Model.csproj": {
-              "projectPath": "C:\\Repositories\\UserService\\UserService.Model\\UserService.Model.csproj"
+            "R:\\Repositories\\UserService\\UserService.Model\\UserService.Model.csproj": {
+              "projectPath": "R:\\Repositories\\UserService\\UserService.Model\\UserService.Model.csproj"
             }
           }
         }
@@ -706,7 +706,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.304/PortableRuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.305/PortableRuntimeIdentifierGraph.json"
       }
     }
   }

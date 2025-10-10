@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "aWXLYX62dqY=",
+  "dgSpecHash": "FDZHvVLYikU=",
   "success": true,
-  "projectFilePath": "C:\\Repositories\\UserService\\UserService.Data\\UserService.Data.csproj",
+  "projectFilePath": "R:\\Repositories\\UserService\\UserService.Data\\UserService.Data.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\Serpen\\.nuget\\packages\\microsoft.entityframeworkcore\\9.0.0-rc.2.24474.1\\microsoft.entityframeworkcore.9.0.0-rc.2.24474.1.nupkg.sha512",
     "C:\\Users\\Serpen\\.nuget\\packages\\microsoft.entityframeworkcore.abstractions\\9.0.0-rc.2.24474.1\\microsoft.entityframeworkcore.abstractions.9.0.0-rc.2.24474.1.nupkg.sha512",
