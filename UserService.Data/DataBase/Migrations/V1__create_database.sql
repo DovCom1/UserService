@@ -21,7 +21,6 @@ CREATE TABLE IF NOT EXISTS friends (
     CHECK (user_id != friend_id)
 );
 
-CREATE INDEX idx_friends_status ON friends(status);
 CREATE INDEX idx_friends_user_id_status ON friends(user_id, status);
 CREATE INDEX idx_friends_friend_id_status ON friends(friend_id, status);
 
@@ -32,15 +31,15 @@ CREATE TABLE IF NOT EXISTS enemies (
     CHECK (user_id != enemy_id)
 );
 
-CREATE OR REPLACE FUNCTION prevent_account_creation_date_update() RETURNS TRIGGER AS $$
+CREATE OR REPLACE FUNCTION prevent_account_creation_time_update() RETURNS TRIGGER AS $$
 BEGIN
-    IF NEW.account_creation_date != OLD.account_creation_date THEN
+    IF NEW.account_creation_time IS DISTINCT FROM OLD.account_creation_time THEN
         RAISE EXCEPTION 'It is forbidden to change the date of creation of the account.';
     END IF;
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE TRIGGER protect_account_creation_date
-BEFORE UPDATE OF account_creation_date ON users
-FOR EACH ROW EXECUTE FUNCTION prevent_account_creation_date_update();
+CREATE TRIGGER protect_account_creation_time
+BEFORE UPDATE OF account_creation_time ON users
+FOR EACH ROW EXECUTE FUNCTION prevent_account_creation_time_update();
