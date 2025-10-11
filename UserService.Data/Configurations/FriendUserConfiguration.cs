@@ -21,6 +21,7 @@ public class FriendUserConfiguration : IEntityTypeConfiguration<FriendUser>
 
         builder.Property(f => f.Status)
             .HasColumnName("status")
+            .HasColumnType("SMALLINT")
             .HasDefaultValue(1)
             .IsRequired();
         

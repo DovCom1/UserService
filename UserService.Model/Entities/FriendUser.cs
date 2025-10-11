@@ -1,4 +1,6 @@
-﻿namespace UserService.Model.Entities;
+﻿using UserService.Model.Enums;
+
+namespace UserService.Model.Entities;
 
 public class FriendUser
 {
@@ -6,5 +8,5 @@ public class FriendUser
     public User User { get; set; }
     public Guid FriendId { get; set; }
     public User Friend { get; set; }
-    public short Status { get; set; }
+    public FriendStatus Status { get; set; }
 }

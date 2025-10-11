@@ -1,4 +1,6 @@
-﻿namespace UserService.Model.Entities;
+﻿using UserService.Model.Enums;
+
+namespace UserService.Model.Entities;
 
 public class User
 {
@@ -7,8 +9,8 @@ public class User
     public string Nickname { get; set; }
     public string Email { get; set; }
     public string AvatarUrl { get; set; }
-    public short Gender { get; set; }
-    public short Status { get; set; }
+    public Gender Gender { get; set; }
+    public UserStatus Status { get; set; }
     public DateOnly DateOfBirth { get; set; }
     public DateTime AccountCreationTime { get; set; }
     public ICollection<FriendUser> Friends { get; set; }

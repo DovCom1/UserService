@@ -37,10 +37,12 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
 
         builder.Property(u => u.Gender)
             .HasColumnName("gender")
+            .HasColumnType("SMALLINT")
             .IsRequired();
         
         builder.Property(u => u.Status)
             .HasColumnName("status")
+            .HasColumnType("SMALLINT")
             .IsRequired();
         
         builder.Property(u => u.DateOfBirth)
