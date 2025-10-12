@@ -16,7 +16,7 @@ CREATE INDEX idx_users_nickname_uid ON users(nickname, uid);
 CREATE TABLE IF NOT EXISTS friends (
     user_id UUID REFERENCES users(id) ON DELETE CASCADE,
     friend_id UUID REFERENCES users(id) ON DELETE CASCADE,
-    status SMALLINT NOT NULL DEFAULT 1 CHECK (status in (1, 2, 3)), -- 1=Заявка отправлена, 2=Друг, 3=Заявка отклонена 
+    status SMALLINT NOT NULL DEFAULT 1 CHECK (status in (1, 2)), -- 1=Заявка отправлена, 2=Друг
     PRIMARY KEY (user_id, friend_id),
     CHECK (user_id != friend_id)
 );

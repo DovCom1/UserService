@@ -8,8 +8,5 @@ public enum FriendStatus
     ApplicationSent = 1,
     
     [Description("Друг")]
-    Friend = 2,
-    
-    [Description("Заявка отклонена")]
-    ApplicationRejected = 3
+    Friend = 2
 }
