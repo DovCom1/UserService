@@ -12,9 +12,7 @@ public record UpdateUserDTO(
     string? Email,
     [StringLength(255, ErrorMessage = "URL аватара должен содержать не более 255 символов")]
     string? AvatarUrl,
-    [EnumDataType(typeof(Gender), ErrorMessage = "Неверный пол")]
-    Gender? Gender,
-    [EnumDataType(typeof(UserStatus), ErrorMessage = "Неверный статус")]
-    UserStatus? Status,
+    string? Gender,
+    string? Status,
     DateOnly? DateOfBirth
     );

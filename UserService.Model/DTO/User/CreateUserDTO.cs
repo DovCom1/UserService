@@ -10,7 +10,6 @@ public record CreateUserDTO(
     string Nickname,
     [Required] [EmailAddress(ErrorMessage = "Неверный адрес электронной почты")]
     string Email,
-    [Required] [EnumDataType(typeof(Gender), ErrorMessage = "Неверный пол")]
-    Gender Gender,
+    string Gender,
     [Required] DateOnly DateOfBirth
     );
