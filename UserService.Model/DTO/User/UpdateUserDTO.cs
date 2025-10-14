@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using UserService.Model.Enums;
+using UserService.Model.Utilities;
 
 namespace UserService.Model.DTO.User;
 
@@ -12,7 +13,9 @@ public record UpdateUserDTO(
     string? Email,
     [StringLength(255, ErrorMessage = "URL аватара должен содержать не более 255 символов")]
     string? AvatarUrl,
+    [EnumDescription(typeof(Gender))]
     string? Gender,
+    [EnumDescription(typeof(UserStatus))]
     string? Status,
     DateOnly? DateOfBirth
     );

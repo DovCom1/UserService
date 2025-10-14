@@ -1,10 +1,11 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System.Collections.Concurrent;
+using System.ComponentModel.DataAnnotations;
 
 namespace UserService.Model.Utilities;
 
 public class EnumDescriptionAttribute(Type enumType) : ValidationAttribute
 {
-    private readonly Type _enumType = enumType;
+    private static readonly ConcurrentDictionary<Type, List<string>> Cache = new();
 
     protected override ValidationResult IsValid(object? value, ValidationContext validationContext)
     {
@@ -14,12 +15,13 @@ public class EnumDescriptionAttribute(Type enumType) : ValidationAttribute
         if (string.IsNullOrEmpty(strValue)) 
             return new ValidationResult($"Значение для {validationContext.DisplayName} не может быть пустым.");
         
-        var descriptions = Enum.GetValues(_enumType)
+        var descriptions = Cache.GetOrAdd(enumType, type => 
+            Enum.GetValues(enumType)
             .Cast<Enum>()
             .Select(e => e.GetDescription())
-            .ToList();
+            .ToList());
 
-        if (!descriptions.Contains(strValue))
+        if (!descriptions.Contains(strValue, StringComparer.OrdinalIgnoreCase))
             return new ValidationResult($"Значение '{strValue}' для {validationContext.DisplayName} недопустимо. Допустимые значения: {string.Join(", ", descriptions)}.");
 
         return ValidationResult.Success!; 

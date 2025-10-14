@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using UserService.Model.Enums;
+using UserService.Model.Utilities;
 
 namespace UserService.Model.DTO.User;
 
@@ -10,6 +11,7 @@ public record CreateUserDTO(
     string Nickname,
     [Required] [EmailAddress(ErrorMessage = "Неверный адрес электронной почты")]
     string Email,
+    [EnumDescription(typeof(Gender))]
     string Gender,
     [Required] DateOnly DateOfBirth
     );
