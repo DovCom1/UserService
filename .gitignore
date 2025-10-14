@@ -14,5 +14,5 @@
 # Datasource local storage ignored files
 **/dataSources/
 **/dataSources.local.xml
-/UserService.Data/obj/**
-/UserService.Data/obj/Debug
+**/UserService.Data/obj/**
+**/UserService.Data/obj/Debug
