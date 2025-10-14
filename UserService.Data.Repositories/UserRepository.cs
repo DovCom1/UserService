@@ -35,7 +35,7 @@ public class UserRepository(ILogger<UserRepository> logger, DataBaseContext cont
     public async Task<bool> DeleteAsync(Guid id, CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        var user = await _context.Users.FindAsync(new object[] {id}, cancellationToken);
+        var user = await _context.Users.FindAsync([id], cancellationToken);
         if (user == null)
         {
             _logger.LogWarning("DeleteAsync: User with id: {id} not found", id);
@@ -49,7 +49,7 @@ public class UserRepository(ILogger<UserRepository> logger, DataBaseContext cont
     public async Task<User?> GetAsync(Guid id, CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        var user = await _context.Users.FindAsync(new object[] {id}, cancellationToken);
+        var user = await _context.Users.FindAsync([id], cancellationToken);
         if (user != null) return user;
         _logger.LogWarning("GetAsync: User with id: {id} not found", id);
         return null;
