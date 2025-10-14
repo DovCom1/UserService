@@ -43,7 +43,8 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
         builder.Property(u => u.Status)
             .HasColumnName("status")
             .HasColumnType("SMALLINT")
-            .IsRequired();
+            .IsRequired()
+            .HasDefaultValue(1);
         
         builder.Property(u => u.DateOfBirth)
             .HasColumnName("date_of_birth")
