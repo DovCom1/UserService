@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using UserService.Model.Entities;
 
-namespace UserService.Data;
+namespace UserService.Data.Core;
 
 public class DataBaseContext(DbContextOptions<DataBaseContext> options) : DbContext(options)
 {

@@ -2,7 +2,7 @@
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using UserService.Model.Entities;
 
-namespace UserService.Data.Configurations;
+namespace UserService.Data.Core.Configurations;
 
 public class FriendUserConfiguration : IEntityTypeConfiguration<FriendUser>
 {
