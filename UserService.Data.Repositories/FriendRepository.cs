@@ -60,6 +60,7 @@ public class FriendRepository(ILogger<FriendRepository> logger, DataBaseContext 
     {
         cancellationToken.ThrowIfCancellationRequested();
         var query = _context.Friends
+            .AsNoTracking()
             .Where(f => (f.UserId == userId || f.FriendId == userId) && f.Status == FriendStatus.Friend)
             .Include(f => f.Friend)
             .Include(f => f.User)
@@ -75,6 +76,7 @@ public class FriendRepository(ILogger<FriendRepository> logger, DataBaseContext 
     {
         cancellationToken.ThrowIfCancellationRequested();
         var query = _context.Friends
+            .AsNoTracking()
             .Where(f => f.FriendId == userId && f.Status == FriendStatus.ApplicationSent)
             .Include(f => f.User)
             .Select(f => f.User)
@@ -89,6 +91,7 @@ public class FriendRepository(ILogger<FriendRepository> logger, DataBaseContext 
     {
         cancellationToken.ThrowIfCancellationRequested();
         var query = _context.Friends
+            .AsNoTracking()
             .Where(f => f.UserId == userId && f.Status == FriendStatus.ApplicationSent)
             .Include(f => f.Friend)
             .Select(f => f.Friend)

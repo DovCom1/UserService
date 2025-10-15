@@ -46,6 +46,7 @@ public class EnemyRepository(ILogger<EnemyRepository> logger, DataBaseContext co
     {
         cancellationToken.ThrowIfCancellationRequested();
         var query = _context.Enemies
+            .AsNoTracking()
             .Where(e => e.UserId == userId)
             .Include(e => e.Enemy)
             .Select(e => e.Enemy)
