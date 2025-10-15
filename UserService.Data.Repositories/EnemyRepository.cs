@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using UserService.Contract.Repositories;
 using UserService.Data.Core;
 using UserService.Model.Entities;
@@ -33,7 +34,7 @@ public class EnemyRepository(ILogger<EnemyRepository> logger, DataBaseContext co
             await _context.Enemies.FindAsync([entity.UserId, entity.EnemyId], cancellationToken);
         if (enemyUser == null)
         {
-            _logger.LogWarning($"RemoveAsync: Enemy relationship with UserId {entity.UserId} and EnemyId {entity.EnemyId} not found");
+            _logger.LogWarning($"DeleteAsync: Enemy relationship with UserId {entity.UserId} and EnemyId {entity.EnemyId} not found");
             return false;
         }
         _context.Enemies.Remove(enemyUser);
@@ -43,6 +44,15 @@ public class EnemyRepository(ILogger<EnemyRepository> logger, DataBaseContext co
 
     public async Task<(IEnumerable<User> enemies, int total)> GetEnemiesAsync(Guid userId, int offset, int limit, CancellationToken cancellationToken = default)
     {
-        throw new NotImplementedException();
+        cancellationToken.ThrowIfCancellationRequested();
+        var query = _context.Enemies
+            .Where(e => e.UserId == userId)
+            .Include(e => e.Enemy)
+            .Select(e => e.Enemy)
+            .Skip(offset)
+            .Take(limit);
+        var enemies = await query.ToListAsync(cancellationToken);
+        var total = await _context.Enemies.CountAsync(e => e.UserId == userId,cancellationToken);
+        return (enemies, total);
     }
 }
