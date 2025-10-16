@@ -21,7 +21,7 @@ public class EnumDescriptionAttribute(Type enumType) : ValidationAttribute
             .Select(e => e.GetDescription())
             .ToList());
 
-        if (!descriptions.Contains(strValue, StringComparer.OrdinalIgnoreCase))
+        if (!descriptions.Contains(strValue))
             return new ValidationResult($"Значение '{strValue}' для {validationContext.DisplayName} недопустимо. Допустимые значения: {string.Join(", ", descriptions)}.");
 
         return ValidationResult.Success!; 

@@ -13,7 +13,8 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
 
         builder.Property(u => u.Id)
             .HasColumnName("id")
-            .HasDefaultValueSql("uuid_generate_v4()");
+            .HasDefaultValueSql("uuid_generate_v4()")
+            .ValueGeneratedOnAdd();
         
         builder.Property(u => u.Uid)
             .HasColumnName("uid")
@@ -52,7 +53,8 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
         
         builder.Property(u => u.AccountCreationTime)
             .HasColumnName("account_creation_time")
-            .HasDefaultValueSql("CURRENT_TIMESTAMP");
+            .HasDefaultValueSql("CURRENT_TIMESTAMP")
+            .ValueGeneratedOnAdd();
         
         builder.HasIndex(u => u.Uid)
             .IsUnique()
@@ -73,19 +75,19 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
             .HasForeignKey(f => f.UserId)
             .OnDelete(DeleteBehavior.Cascade);
         
-        builder.HasMany(u => u.Friends)
-            .WithOne(f => f.Friend)
-            .HasForeignKey(f => f.FriendId)
-            .OnDelete(DeleteBehavior.Cascade);
+        // builder.HasMany(u => u.Friends)
+        //     .WithOne(f => f.Friend)
+        //     .HasForeignKey(f => f.FriendId)
+        //     .OnDelete(DeleteBehavior.Cascade);
 
         builder.HasMany(u => u.Enemies)
             .WithOne(e => e.User)
             .HasForeignKey(e => e.UserId)
             .OnDelete(DeleteBehavior.Cascade);
         
-        builder.HasMany(u => u.Enemies)
-            .WithOne(e => e.Enemy)
-            .HasForeignKey(e => e.EnemyId)
-            .OnDelete(DeleteBehavior.Cascade);
+        // builder.HasMany(u => u.Enemies)
+        //     .WithOne(e => e.Enemy)
+        //     .HasForeignKey(e => e.EnemyId)
+        //     .OnDelete(DeleteBehavior.Cascade);
     }
 }

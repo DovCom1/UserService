@@ -4,7 +4,9 @@ using UserService.Contract.Managers;
 using UserService.Contract.Repositories;
 using UserService.Model.DTO.User;
 using UserService.Model.Entities;
+using UserService.Model.Enums;
 using UserService.Model.Exceptions;
+using UserService.Model.Utilities;
 
 namespace UserService.Service;
 
@@ -26,19 +28,36 @@ public class UserManager(IUserRepository userRepository, IMapper mapper, ILogger
     {
         await ValidateUidAndEmail(id, userDto.Uid, userDto.Email, cancellationToken);
         ValidateDateOfBirth(userDto.DateOfBirth);
-        var user = await _userRepository.GetAsync(id, cancellationToken);
+        var user = await _userRepository.GetAsyncForUpdate(id, cancellationToken);
         if (user != null)
         {
-            _mapper.Map(userDto, user);
-            user = await _userRepository.UpdateAsync(user, cancellationToken);
-            if (user == null) UserNotFound(id);
+            if (userDto.Uid != null) user.Uid = userDto.Uid;
+            if (userDto.Nickname != null) user.Nickname = userDto.Nickname;
+            if (userDto.Email != null) user.Email = userDto.Email;
+            if (userDto.AvatarUrl != null) user.AvatarUrl = userDto.AvatarUrl;
+            if (userDto.Gender != null) user.Gender = userDto.Gender.ParseByDescription<Gender>();
+            if (userDto.Status != null) user.Status = userDto.Status.ParseByDescription<UserStatus>();
+            if (userDto.DateOfBirth != null) user.DateOfBirth = userDto.DateOfBirth.Value;
+            await _userRepository.UpdateAsync(user, cancellationToken);
         }
         else
         {
             UserNotFound(id);
         }
-        _logger.LogInformation($"User with Id {id} successfully updated");
         return _mapper.Map<UserDTO>(user);
+        
+        // if (user != null)
+        // {
+        //     _mapper.Map(userDto, user);
+        //     user = await _userRepository.UpdateAsync(user, cancellationToken);
+        //     if (user == null) UserNotFound(id);
+        // }
+        // else
+        // {
+        //     UserNotFound(id);
+        // }
+        // _logger.LogInformation($"User with Id {id} successfully updated");
+        // return _mapper.Map<UserDTO>(user);
     }
 
     public async Task DeleteAsync(Guid id, CancellationToken cancellationToken)
