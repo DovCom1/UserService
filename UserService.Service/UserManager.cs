@@ -47,6 +47,7 @@ public class UserManager(IUserRepository userRepository, IMapper mapper, ILogger
         {
             UserNotFound(id);
         }
+        _logger.LogInformation($"User with Id {id} successfully deleted");
     }
 
     public async Task<UserDTO> GetAsync(Guid id, CancellationToken cancellationToken)

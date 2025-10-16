@@ -57,6 +57,11 @@ public class UserRepository(ILogger<UserRepository> logger, DataBaseContext cont
     {
         return await _context.Users.AsNoTracking().AnyAsync(u => u.Email == email && u.Id != id, cancellationToken);
     }
+
+    public async Task<bool> ExistsAsync(Guid id, CancellationToken cancellationToken = default)
+    {
+        return await _context.Users.AsNoTracking().AnyAsync(u => u.Id == id, cancellationToken);
+    }
     
     // Обёртка try-catch над SaveChangesAsync
     private async Task TrySaveChangeAsync(string methodName, Guid userId, CancellationToken cancellationToken, string error)

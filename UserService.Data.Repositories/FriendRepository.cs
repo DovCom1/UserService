@@ -15,68 +15,53 @@ public class FriendRepository(ILogger<FriendRepository> logger, DataBaseContext 
     public async Task<FriendUser> AddAsync(FriendUser entity, CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        await CheckUserExists(entity.UserId, "AddAsync: userId", cancellationToken);
-        await CheckUserExists(entity.FriendId, "AddAsync: friendId", cancellationToken);
-        if (entity.UserId == entity.FriendId)
-        {
-            _logger.LogWarning($"AddAsync: UserId {entity.UserId} cannot add self as friend");
-            throw new UserServiceException("Нельзя добавить себя в друзья.", 400);
-        }
-        if (await _context.Friends.AsNoTracking().AnyAsync(f => (f.UserId == entity.UserId && f.FriendId == entity.FriendId)
-                || (f.UserId == entity.FriendId && f.FriendId == entity.UserId), cancellationToken))
-        {
-            _logger.LogWarning($"AddAsync: Friend relationship between {entity.UserId} and {entity.FriendId} already exists");
-            throw new UserServiceException("Пользователь уже находится в списке друзей или заявка уже отправлена", 409);
-        }
         await _context.Friends.AddAsync(entity, cancellationToken);
         await TrySaveChangeAsync("Add", entity, cancellationToken, "Ошибка базы данных при отправке заявки в друзья.");
         return entity;
     }
 
-    public async Task<FriendUser> UpdateAsync(FriendUser entity, CancellationToken cancellationToken = default)
+    public async Task<FriendUser?> UpdateAsync(FriendUser entity, CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
         var friendUser = await _context.Friends.FindAsync([entity.UserId, entity.FriendId], cancellationToken);
-        if (friendUser == null)
-        {
-            _logger.LogWarning($"UpdateAsync: Friend relationship with UserId {entity.UserId} and FriendId {entity.FriendId} not found");
-            throw new UserServiceException("Этой заявки в друзья не существует", 404);
-        }
+        if (friendUser == null) return null;
         friendUser.Status = entity.Status;
         await TrySaveChangeAsync("Update", entity, cancellationToken, "Ошибка базы данных при обновлении статуса заявки в друзья.");
         return friendUser;
     }
 
-    public async Task<bool> ExistsAsync(FriendUser entity, CancellationToken cancellationToken = default)
+    public async Task<bool> ExistsAcceptedFriendAsync(Guid userId, Guid friendId, CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
         var exists = await _context.Friends.AsNoTracking()
-                .AnyAsync(f => (f.UserId == entity.FriendId && f.FriendId == entity.UserId 
-                                || f.UserId == entity.UserId && f.FriendId == entity.FriendId) && f.Status == FriendStatus.Friend, cancellationToken);
+                .AnyAsync(f => (f.UserId == friendId && f.FriendId == userId 
+                                || f.UserId == userId && f.FriendId == friendId) && f.Status == FriendStatus.Friend, cancellationToken);
         return exists;
     }
+
+    public async Task<bool> ExistsAsync(Guid userId, Guid friendId, CancellationToken cancellationToken = default)
+    {
+        return await _context.Friends.AsNoTracking().AnyAsync(f =>
+            (f.UserId == userId && f.FriendId == friendId)
+            || (f.UserId == friendId && f.FriendId == userId), cancellationToken);
+    }
     
-    public async Task DeleteAsync(FriendUser entity, CancellationToken cancellationToken = default)
+    public async Task<bool> DeleteAsync(FriendUser entity, CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
         var friendUser = await _context.Friends
             .FirstOrDefaultAsync(f => (f.UserId == entity.FriendId && f.FriendId == entity.UserId 
-                            || f.UserId == entity.UserId && f.FriendId == entity.FriendId) && f.Status == FriendStatus.Friend, cancellationToken);
+                            || f.UserId == entity.UserId && f.FriendId == entity.FriendId), cancellationToken);
 
-        if (friendUser == null)
-        {
-            _logger.LogWarning($"DeleteAsync: Friend relationship with UserId {entity.UserId} and FriendId {entity.FriendId} not found");
-            throw new UserServiceException("Пользователь не находится в списке ваших друзей", 404);
-        }
+        if (friendUser == null) return false;
         _context.Friends.Remove(friendUser);
         await TrySaveChangeAsync("Delete", entity, cancellationToken, "Ошибка базы данных при удалении из списка друзей.");
+        return true;
     }
 
     public async Task<(IEnumerable<User> friends, int total)> GetFriendsAsync(Guid userId, int offset, int limit, CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        ValidatePagination(offset, limit);
-        await CheckUserExists(userId, "GetFriendsAsync", cancellationToken);
         var query = _context.Friends
             .AsNoTracking()
             .Where(f => (f.UserId == userId || f.FriendId == userId) && f.Status == FriendStatus.Friend)
@@ -95,8 +80,6 @@ public class FriendRepository(ILogger<FriendRepository> logger, DataBaseContext 
     public async Task<(IEnumerable<User> friends, int total)> GetIncomingRequestsAsync(Guid userId, int offset, int limit, CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        ValidatePagination(offset, limit);
-        await CheckUserExists(userId, "GetIncomingRequestsAsync", cancellationToken);
         var query = _context.Friends
             .AsNoTracking()
             .Where(f => f.FriendId == userId && f.Status == FriendStatus.ApplicationSent)
@@ -114,8 +97,6 @@ public class FriendRepository(ILogger<FriendRepository> logger, DataBaseContext 
     public async Task<(IEnumerable<User> friends, int total)> GetOutcomingRequestsAsync(Guid userId, int offset, int limit, CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        ValidatePagination(offset, limit);
-        await CheckUserExists(userId, "GetOutcomingRequestsAsync", cancellationToken);
         var query = _context.Friends
             .AsNoTracking()
             .Where(f => f.UserId == userId && f.Status == FriendStatus.ApplicationSent)
@@ -160,20 +141,5 @@ public class FriendRepository(ILogger<FriendRepository> logger, DataBaseContext 
             _logger.LogError(ex, $"{methodName}: Database error while retrieving data");
             throw new UserServiceException($"Ошибка базы данных при получении списка.", 500);
         }
-    }
-    
-    private async Task CheckUserExists(Guid userId, string methodName, CancellationToken cancellationToken)
-    {
-        if (!await _context.Users.AsNoTracking().AnyAsync(u => u.Id == userId, cancellationToken))
-        {
-            _logger.LogWarning($"{methodName}: User with Id {userId} not found");
-            throw new UserServiceException("Пользователь не существует.", 404);
-        }
-    } 
-    
-    private static void ValidatePagination(int offset, int limit)
-    {
-        if (offset < 0) throw new UserServiceException($"Offset не может быть отрицательным.", 400);
-        if (limit <= 0) throw new UserServiceException($"Limit должен быть больше нуля.", 400);
     }
 }

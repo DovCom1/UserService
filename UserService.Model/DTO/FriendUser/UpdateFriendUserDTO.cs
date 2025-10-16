@@ -4,4 +4,4 @@ using UserService.Model.Utilities;
 
 namespace UserService.Model.DTO.FriendUser;
 
-public record UpdateFriendUserDTO([EnumDescription(typeof(FriendStatus))] string Status);
+public record UpdateFriendUserDTO(Guid UserId, Guid FriendId, [EnumDescription(typeof(FriendStatus))] string Status);
