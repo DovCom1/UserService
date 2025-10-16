@@ -112,6 +112,6 @@ public class FriendManager(IFriendRepository friendRepository, IUserRepository u
     {
         if (offset < 0) throw new UserServiceException($"Offset не может быть отрицательным.", 400);
         if (limit <= 0) throw new UserServiceException($"Limit должен быть больше нуля.", 400);
-        if (limit > 50) throw new UserServiceException($"Limit не может превышать 50.", 400);
+        if (limit > 20) throw new UserServiceException($"Limit не может превышать 20.", 400);
     }
 }
