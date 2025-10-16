@@ -53,8 +53,7 @@ public class FriendManager(IFriendRepository friendRepository, IUserRepository u
     {
         await CheckUserExists(friendUserDto.UserId, "DeleteAsync", cancellationToken);
         await CheckUserExists(friendUserDto.FriendId, "DeleteAsync", cancellationToken);
-        var friendUser = _mapper.Map<FriendUser>(friendUserDto);
-        if (!await _friendRepository.DeleteAsync(friendUser, cancellationToken))
+        if (!await _friendRepository.DeleteAsync(_mapper.Map<FriendUser>(friendUserDto), cancellationToken))
         {
             _logger.LogWarning($"DeleteAsync: Friend relationship with UserId {friendUserDto.UserId} and FriendId {friendUserDto.FriendId} not found");
             throw new UserServiceException("Пользователь не находится в списке ваших друзей", 404);
