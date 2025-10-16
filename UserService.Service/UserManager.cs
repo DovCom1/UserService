@@ -1,4 +1,5 @@
-﻿using AutoMapper;
+﻿using System.Diagnostics.CodeAnalysis;
+using AutoMapper;
 using Microsoft.Extensions.Logging;
 using UserService.Contract.Managers;
 using UserService.Contract.Repositories;
@@ -12,94 +13,79 @@ namespace UserService.Service;
 
 public class UserManager(IUserRepository userRepository, IMapper mapper, ILogger<UserManager> logger) : IUserManager
 {
-    private readonly IUserRepository _userRepository = userRepository;
-    private readonly IMapper _mapper = mapper;
-    private readonly ILogger<UserManager> _logger = logger;
-    public async Task<UserDTO> RegisterAsync(CreateUserDTO userDto, CancellationToken cancellationToken)
+    public async Task<UserDTO> RegisterAsync(CreateUserDTO userDto, CancellationToken ct)
     {
-        await ValidateUidAndEmail(Guid.Empty, userDto.Uid, userDto.Email, cancellationToken);
+        await ValidateUidAndEmail(Guid.Empty, userDto.Uid, userDto.Email, ct);
         ValidateDateOfBirth(userDto.DateOfBirth);
-        var user = await _userRepository.AddAsync(_mapper.Map<User>(userDto), cancellationToken);
-        _logger.LogInformation($"User with Id {user.Id} successfully registered");
-        return _mapper.Map<UserDTO>(user);
+        var user = await userRepository.AddAsync(mapper.Map<User>(userDto), ct);
+        logger.LogInformation($"User with Id {user.Id} successfully registered");
+        return mapper.Map<UserDTO>(user);
     }
 
-    public async Task<UserDTO> UpdateAsync(UpdateUserDTO userDto, Guid id, CancellationToken cancellationToken)
+    public async Task<UserDTO> UpdateAsync(UpdateUserDTO userDto, Guid id, CancellationToken ct)
     {
-        await ValidateUidAndEmail(id, userDto.Uid, userDto.Email, cancellationToken);
+        await ValidateUidAndEmail(id, userDto.Uid, userDto.Email, ct);
         ValidateDateOfBirth(userDto.DateOfBirth);
-        var user = await _userRepository.GetAsyncForUpdate(id, cancellationToken);
-        if (user != null)
+        var user = await userRepository.GetAsyncForUpdate(id, ct);
+        if (user == null)
         {
-            if (userDto.Uid != null) user.Uid = userDto.Uid;
-            if (userDto.Nickname != null) user.Nickname = userDto.Nickname;
-            if (userDto.Email != null) user.Email = userDto.Email;
-            if (userDto.AvatarUrl != null) user.AvatarUrl = userDto.AvatarUrl;
-            if (userDto.Gender != null) user.Gender = userDto.Gender.ParseByDescription<Gender>();
-            if (userDto.Status != null) user.Status = userDto.Status.ParseByDescription<UserStatus>();
-            if (userDto.DateOfBirth != null) user.DateOfBirth = userDto.DateOfBirth.Value;
-            await _userRepository.UpdateAsync(user, cancellationToken);
+            logger.LogWarning($"DeleteAsync: User with Id {id} not found");
+            throw new UserServiceException("Такого пользователя не существует.", 404);
         }
-        else
+        if (userDto.Uid != null) user.Uid = userDto.Uid;
+        if (userDto.Nickname != null) user.Nickname = userDto.Nickname;
+        if (userDto.Email != null) user.Email = userDto.Email;
+        if (userDto.AvatarUrl != null) user.AvatarUrl = userDto.AvatarUrl;
+        if (userDto.Gender != null) user.Gender = userDto.Gender.ParseByDescription<Gender>();
+        if (userDto.Status != null) user.Status = userDto.Status.ParseByDescription<UserStatus>();
+        if (userDto.DateOfBirth != null) user.DateOfBirth = userDto.DateOfBirth.Value;
+        await userRepository.SaveChangesAsync(ct);
+        return mapper.Map<UserDTO>(user);
+    }
+
+    public async Task DeleteAsync(Guid id, CancellationToken ct)
+    {
+        if (!await userRepository.DeleteAsync(id, ct))
         {
-            UserNotFound(id);
+            logger.LogWarning($"DeleteAsync: User with Id {id} not found");
+            throw new UserServiceException("Такого пользователя не существует.", 404);
         }
-        return _mapper.Map<UserDTO>(user);
-        
-        // if (user != null)
-        // {
-        //     _mapper.Map(userDto, user);
-        //     user = await _userRepository.UpdateAsync(user, cancellationToken);
-        //     if (user == null) UserNotFound(id);
-        // }
-        // else
-        // {
-        //     UserNotFound(id);
-        // }
-        // _logger.LogInformation($"User with Id {id} successfully updated");
-        // return _mapper.Map<UserDTO>(user);
+        logger.LogInformation($"User with Id {id} successfully deleted");
     }
 
-    public async Task DeleteAsync(Guid id, CancellationToken cancellationToken)
+    public async Task<UserDTO> GetAsync(Guid id, CancellationToken ct)
     {
-        if (!await _userRepository.DeleteAsync(id, cancellationToken))
+        var user = await userRepository.GetAsync(id, ct);
+        if (user == null)
         {
-            UserNotFound(id);
+            logger.LogWarning($"DeleteAsync: User with Id {id} not found");
+            throw new UserServiceException("Такого пользователя не существует.", 404);
         }
-        _logger.LogInformation($"User with Id {id} successfully deleted");
+        return mapper.Map<UserDTO>(user);
     }
 
-    public async Task<UserDTO> GetAsync(Guid id, CancellationToken cancellationToken)
+    public async Task<ShortUserDTO> GetShortAsync(Guid id, CancellationToken ct)
     {
-        var user = await _userRepository.GetAsync(id, cancellationToken);
-        if (user == null) UserNotFound(id);
-        return _mapper.Map<UserDTO>(user);
-    }
-
-    public async Task<ShortUserDTO?> GetShortAsync(Guid id, CancellationToken cancellationToken)
-    {
-        var user = await _userRepository.GetAsync(id, cancellationToken);
-        if (user == null) UserNotFound(id);
-        return _mapper.Map<ShortUserDTO>(user);
-    }
-
-    private void UserNotFound(Guid id)
-    {
-        _logger.LogWarning($"DeleteAsync: User with Id {id} not found");
-        throw new UserServiceException("Такого пользователя не существует.", 404);
+        var user = await userRepository.GetAsync(id, ct);
+        if (user == null)
+        {
+            logger.LogWarning($"DeleteAsync: User with Id {id} not found");
+            throw new UserServiceException("Такого пользователя не существует.", 404);
+        }
+        return mapper.Map<ShortUserDTO>(user);
     }
     
-    private async Task ValidateUidAndEmail(Guid id, string? uid, string? email, CancellationToken cancellationToken)
+    private async Task ValidateUidAndEmail(Guid id, string? uid, string? email, CancellationToken ct)
     {
-        if (uid != null && await _userRepository.ExistsWithUidAsync(id, uid, cancellationToken))
+        if (uid != null && await userRepository.ExistsWithUidAsync(id, uid, ct))
         {
-            _logger.LogWarning($"Validation failed: Uid {uid} already exists");
+            logger.LogWarning($"Validation failed: Uid {uid} already exists");
             throw new UserServiceException("Пользователь с таким UID уже существует.", 409);
         }
 
-        if (email != null && await _userRepository.ExistsWithEmailAsync(id, email, cancellationToken))
+        if (email != null && await userRepository.ExistsWithEmailAsync(id, email, ct))
         {
-            _logger.LogWarning($"Validation failed: Email {email} already exists");
+            logger.LogWarning($"Validation failed: Email {email} already exists");
             throw new UserServiceException("Этот адрес электронной почты уже привязан в другой учётной записи.", 409);
         }
     }
@@ -108,7 +94,7 @@ public class UserManager(IUserRepository userRepository, IMapper mapper, ILogger
     {
         if (dateOfBirth.HasValue && dateOfBirth > DateOnly.FromDateTime(DateTime.UtcNow))
         {
-            _logger.LogWarning("Registration failed: DateOfBirth is in the future");
+            logger.LogWarning("Registration failed: DateOfBirth is in the future");
             throw new UserServiceException("Ого! Вы гость из будущего! Но таких мы не регистрируем :(", 400);
         }
     }
