@@ -1,13 +1,13 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using UserService.Contract.Managers;
 using UserService.Model.DTO.FriendUser;
-using UserService.Service;
 
 namespace UserService.Api.Controllers;
 
 
 [ApiController]
 [Route("api/users/{userId:guid}/[controller]")]
-public class FriendsController(FriendManager friendManager) : ControllerBase
+public class FriendsController(IFriendManager friendManager) : ControllerBase
 {
     [HttpPost("{friendId:guid}")]
     public async Task<ActionResult<FriendUserDTO>> AddFriend(Guid userId, Guid friendId, CancellationToken ct)
@@ -17,13 +17,20 @@ public class FriendsController(FriendManager friendManager) : ControllerBase
         return CreatedAtAction(nameof(CheckFriendExists), new { userId, friendId }, result);
     }
 
-    [HttpPatch("{friendId:guid}")]
-    public async Task<ActionResult<FriendUserDTO>> AcceptRequest(Guid userId, Guid friendId,
-        [FromBody] UpdateFriendUserDTO dto, CancellationToken ct)
+    [HttpPatch("{friendId:guid}/accept")]
+    public async Task<ActionResult<FriendUserDTO>> AcceptRequest(Guid userId, Guid friendId, CancellationToken ct)
     {
-        dto = new UpdateFriendUserDTO(userId, friendId, dto.Status);
+        var dto = new UpdateFriendUserDTO(userId, friendId, "Друг");
         var result = await friendManager.AcceptFriendRequestAsync(dto, ct);
         return Ok(result);
+    }
+
+    [HttpPatch("{friendId:guid}/reject")]
+    public async Task<ActionResult> RejectRequest(Guid userId, Guid friendId, CancellationToken ct)
+    {
+        var dto = new DeleteFriendUserDTO(userId, friendId);
+        await friendManager.RejectFriendRequestAsync(dto, ct);
+        return NoContent();
     }
 
     [HttpDelete("{friendId:guid}")]

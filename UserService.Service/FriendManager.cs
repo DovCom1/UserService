@@ -42,8 +42,20 @@ public class FriendManager(IFriendRepository friendRepository, IUserRepository u
             logger.LogWarning($"UpdateAsync: Friend relationship with UserId {friendUserDto.UserId} and FriendId {friendUserDto.FriendId} not found");
             throw new UserServiceException("Этой заявки в друзья не существует", 404);
         }
-        logger.LogInformation($"User with Id {friendUserDto.FriendId} successfully accept friend request from User with Id {friendUserDto.UserId}");
+        logger.LogInformation($"User with Id {friendUserDto.FriendId} successfully accepted friend request from User with Id {friendUserDto.UserId}");
         return mapper.Map<FriendUserDTO>(friendUser);
+    }
+
+    public async Task RejectFriendRequestAsync(DeleteFriendUserDTO friendUserDto, CancellationToken ct)
+    {
+        await CheckUserExists(friendUserDto.UserId, "DeleteAsync", ct);
+        await CheckUserExists(friendUserDto.FriendId, "DeleteAsync", ct);
+        if (!await friendRepository.DeleteAsync(mapper.Map<FriendUser>(friendUserDto), ct))
+        {
+            logger.LogWarning($"DeleteAsync: Friend request from User with Id {friendUserDto.FriendId} to User with Id {friendUserDto.UserId} not found");
+            throw new UserServiceException("Такой заявки не существует", 404);
+        }
+        logger.LogInformation($"User with Id {friendUserDto.FriendId} successfully rejected friend request from User with Id {friendUserDto.UserId}");
     }
 
     public async Task DeleteAsync(DeleteFriendUserDTO friendUserDto, CancellationToken ct)

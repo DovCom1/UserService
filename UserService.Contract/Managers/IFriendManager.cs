@@ -6,6 +6,7 @@ public interface IFriendManager
 {
     public Task<FriendUserDTO> SendRequestAsync(CreateFriendUserDTO friendUserDto, CancellationToken ct);
     public Task<FriendUserDTO> AcceptFriendRequestAsync(UpdateFriendUserDTO friendUserDto, CancellationToken ct);
+    public Task RejectFriendRequestAsync(DeleteFriendUserDTO friendUserDto, CancellationToken ct);
     public Task DeleteAsync(DeleteFriendUserDTO friendUserDto, CancellationToken ct);
     public Task<bool> CheckFriendExists(Guid userId, Guid friendId, CancellationToken ct);
     public Task<PagedFriendResponseDTO> GetFriendsAsync(Guid userId, int offset, int limit, CancellationToken ct);
