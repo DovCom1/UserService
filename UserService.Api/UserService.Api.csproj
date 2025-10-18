@@ -9,7 +9,13 @@
 
     <ItemGroup>
       <ProjectReference Include="..\UserService.Contract\UserService.Contract.csproj" />
+      <ProjectReference Include="..\UserService.Data.Core\UserService.Data.Core.csproj" />
+      <ProjectReference Include="..\UserService.Data.Repositories\UserService.Data.Repositories.csproj" />
       <ProjectReference Include="..\UserService.Service\UserService.Service.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.0-rc.2" />
     </ItemGroup>
 
 </Project>
