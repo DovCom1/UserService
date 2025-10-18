@@ -8,6 +8,7 @@ public interface IUserRepository
     public Task SaveChangesAsync(CancellationToken ct = default);
     public Task<bool> DeleteAsync(Guid id, CancellationToken ct = default);
     public Task<User?> GetAsync(Guid id, CancellationToken ct = default);
+    public Task<(IEnumerable<User> users, int total)> GetAllAsync(int offset, int limit, CancellationToken ct = default);
     public Task<User?> GetAsyncForUpdate(Guid id, CancellationToken ct = default);
     public Task<bool> ExistsWithUidAsync(Guid id, string uid, CancellationToken ct = default);
     public Task<bool> ExistsWithEmailAsync(Guid id, string email, CancellationToken ct = default);

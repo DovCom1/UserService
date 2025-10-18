@@ -36,6 +36,26 @@ public class UsersController(IUserManager userManager) : ControllerBase
         var user = await userManager.GetShortAsync(id, ct);
         return Ok(user);
     }
+    
+    [HttpGet]
+    public async Task<ActionResult<PagedUsersDTO>> GetAll(
+        [FromQuery] int offset = 0,
+        [FromQuery] int limit = 10,
+        CancellationToken ct = default)
+    {
+        var result = await userManager.GetAllAsync(offset, limit, ct);
+        return Ok(result);
+    }
+    
+    [HttpGet("main")]
+    public async Task<ActionResult<PagedUsersMainDTO>> GetAllMain(
+        [FromQuery] int offset = 0,
+        [FromQuery] int limit = 10,
+        CancellationToken ct = default)
+    {
+        var result = await userManager.GetAllShortAsync(offset, limit, ct);
+        return Ok(result);
+    }
 
     [HttpDelete("{id:guid}")]
     public async Task<ActionResult> Delete(Guid id, CancellationToken ct)

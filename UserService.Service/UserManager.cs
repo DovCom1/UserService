@@ -75,6 +75,22 @@ public class UserManager(IUserRepository userRepository, IMapper mapper, ILogger
         return mapper.Map<ShortUserDTO>(user);
     }
     
+    public async Task<PagedUsersDTO> GetAllAsync(int offset, int limit, CancellationToken ct = default)
+    {
+        ValidatePagination(offset, limit);
+        var (users, total) = await userRepository.GetAllAsync(offset, limit, ct);
+        var userDtos = users.Select(user => mapper.Map<UserDTO>(user));
+        return new PagedUsersDTO(userDtos, offset, limit, total);
+    }
+
+    public async Task<PagedUsersMainDTO> GetAllShortAsync(int offset, int limit, CancellationToken ct = default)
+    {
+        ValidatePagination(offset, limit);
+        var (users, total) = await userRepository.GetAllAsync(offset, limit, ct);
+        var shortUserDtos = users.Select(user => mapper.Map<ShortUserDTO>(user));
+        return new PagedUsersMainDTO(shortUserDtos, offset, limit, total);
+    }
+    
     private async Task ValidateUidAndEmail(Guid id, string? uid, string? email, CancellationToken ct)
     {
         if (uid != null && await userRepository.ExistsWithUidAsync(id, uid, ct))
@@ -97,5 +113,12 @@ public class UserManager(IUserRepository userRepository, IMapper mapper, ILogger
             logger.LogWarning("Registration failed: DateOfBirth is in the future");
             throw new UserServiceException("Ого! Вы гость из будущего! Но таких мы не регистрируем :(", 400);
         }
+    }
+    
+    private static void ValidatePagination(int offset, int limit)
+    {
+        if (offset < 0) throw new UserServiceException($"Offset не может быть отрицательным.", 400);
+        if (limit <= 0) throw new UserServiceException($"Limit должен быть больше нуля.", 400);
+        if (limit > 20) throw new UserServiceException($"Limit не может превышать 20.", 400);
     }
 }

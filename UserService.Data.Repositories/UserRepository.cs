@@ -38,6 +38,17 @@ public class UserRepository(DataBaseContext context) : IUserRepository
         return user;
     }
 
+    public async Task<(IEnumerable<User> users, int total)> GetAllAsync(int offset, int limit, CancellationToken ct = default)
+    {
+        var query = context.Users.AsNoTracking();
+        var total = await query.CountAsync(ct);
+        var users = await query
+            .Skip(offset)
+            .Take(limit)
+            .ToListAsync(ct);
+        return (users, total);
+    }
+
     public async Task<User?> GetAsyncForUpdate(Guid id, CancellationToken ct = default)
     {
         return await context.Users.FirstOrDefaultAsync(u => u.Id == id, ct);
