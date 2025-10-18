@@ -24,9 +24,9 @@ public class EnemyUserConfiguration : IEntityTypeConfiguration<EnemyUser>
             .HasForeignKey(e => e.UserId)
             .OnDelete(DeleteBehavior.Cascade);
         
-        builder.HasOne(e => e.Enemy)
-            .WithMany(u => u.Enemies)
-            .HasForeignKey(e => e.EnemyId)
-            .OnDelete(DeleteBehavior.Cascade);
+        // builder.HasOne(e => e.Enemy)
+        //     .WithMany(u => u.Enemies)
+        //     .HasForeignKey(e => e.EnemyId)
+        //     .OnDelete(DeleteBehavior.Cascade);
     }
 }

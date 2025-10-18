@@ -1,9 +1,11 @@
-﻿CREATE TABLE IF NOT EXISTS users (
+﻿CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
+CREATE TABLE IF NOT EXISTS users (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     uid VARCHAR(10) NOT NULL UNIQUE,
     nickname VARCHAR(50) NOT NULL,
     email VARCHAR(128) NOT NULL UNIQUE,
-    avatar_url VARCHAR(255) DEFAULT "",
+    avatar_url VARCHAR(255) DEFAULT '',
     gender SMALLINT NOT NULL CHECK (gender in (1, 2)), -- 1=Мужской, 2=Женский
     status SMALLINT NOT NULL CHECK (status in (1, 2, 3, 4)), -- 1=В сети, 2=Не активен, 3=Не беспокоить, 4=Не в сети
     date_of_birth DATE NOT NULL,

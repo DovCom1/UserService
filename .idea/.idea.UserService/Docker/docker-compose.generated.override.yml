@@ -1,0 +1,21 @@
+# This is a generated file. Not intended for manual editing.
+version: "3.8"
+services:
+  user-service:
+    build:
+      context: "R:\\Repositories\\UserService\\UserService.Api"
+      dockerfile: "Dockerfile"
+      target: "base"
+    command: []
+    entrypoint:
+    - "dotnet"
+    - "/app/bin/Debug/net9.0/UserService.Api.dll"
+    environment:
+      DOTNET_USE_POLLING_FILE_WATCHER: "true"
+    image: "userservice.api:dev"
+    ports: []
+    volumes:
+    - "C:\\Users\\Serpen\\.nuget\\packages:/home/app/.nuget/packages"
+    - "R:\\Repositories\\UserService\\UserService.Api:/app:rw"
+    - "R:\\Repositories\\UserService:/src:rw"
+    working_dir: "/app"

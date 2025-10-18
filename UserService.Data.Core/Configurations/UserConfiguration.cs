@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using UserService.Model.Entities;
+using UserService.Model.Enums;
 
 namespace UserService.Data.Core.Configurations;
 
@@ -44,8 +45,7 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
         builder.Property(u => u.Status)
             .HasColumnName("status")
             .HasColumnType("SMALLINT")
-            .IsRequired()
-            .HasDefaultValue(1);
+            .IsRequired();
         
         builder.Property(u => u.DateOfBirth)
             .HasColumnName("date_of_birth")

@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using UserService.Model.Entities;
+using UserService.Model.Enums;
 
 namespace UserService.Data.Core.Configurations;
 
@@ -22,7 +23,6 @@ public class FriendUserConfiguration : IEntityTypeConfiguration<FriendUser>
         builder.Property(f => f.Status)
             .HasColumnName("status")
             .HasColumnType("SMALLINT")
-            .HasDefaultValue(1)
             .IsRequired();
         
         builder.HasIndex(f => new {f.UserId, f.Status})
@@ -36,9 +36,9 @@ public class FriendUserConfiguration : IEntityTypeConfiguration<FriendUser>
             .HasForeignKey(f => f.UserId) 
             .OnDelete(DeleteBehavior.Cascade);
         
-        builder.HasOne(f => f.Friend)
-            .WithMany(u => u.Friends)
-            .HasForeignKey(f => f.FriendId)
-            .OnDelete(DeleteBehavior.Cascade);
+        // builder.HasOne(f => f.Friend)
+        //     .WithMany(u => u.Friends)
+        //     .HasForeignKey(f => f.FriendId)
+        //     .OnDelete(DeleteBehavior.Cascade);
     }
 }

@@ -22,13 +22,15 @@ public class DtoMapper : Profile
         CreateMap<CreateUserDTO, User>()
             .ForMember(dest => dest.Gender, opt => opt.MapFrom(src =>
                 Enum.GetValues<Gender>().First(g => g.GetDescription() == src.Gender)))
+            .ForMember(dest => dest.Status, opt => opt.MapFrom(_ => UserStatus.Online))
             .ForMember(dest => dest.AccountCreationTime, opt => opt.MapFrom(_ => DateTime.UtcNow));
         
         CreateMap<UpdateFriendUserDTO, FriendUser>()
             .ForMember(dest => dest.Status, opt => opt.MapFrom(src =>
                 Enum.GetValues<FriendStatus>().First(s => s.GetDescription() == src.Status)));
 
-        CreateMap<CreateFriendUserDTO, FriendUser>();
+        CreateMap<CreateFriendUserDTO, FriendUser>()
+            .ForMember(dest => dest.Status, opt => opt.MapFrom(_ => FriendStatus.ApplicationSent));
         CreateMap<CreateEnemyUserDTO, EnemyUser>();
         CreateMap<FriendUser, DeleteFriendUserDTO>();
         CreateMap<EnemyUser, EnemyUserDTO>();
