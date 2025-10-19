@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Logging;
 using UserService.Contract.Managers;
 using UserService.Contract.Repositories;
+using UserService.Model.DTO.EnemyUser;
 using UserService.Model.DTO.FriendUser;
 using UserService.Model.DTO.User;
 using UserService.Model.Entities;
@@ -10,7 +11,7 @@ using UserService.Model.Utilities;
 
 namespace UserService.Service;
 
-public class FriendManager(IFriendRepository friendRepository, IUserRepository userRepository ,IMapper mapper, ILogger<FriendManager> logger) : IFriendManager
+public class FriendManager(IFriendRepository friendRepository, IUserRepository userRepository, IEnemyRepository enemyRepository, IMapper mapper, ILogger<FriendManager> logger) : IFriendManager
 {
     public async Task<FriendUserDTO> SendRequestAsync(CreateFriendUserDTO friendUserDto, CancellationToken ct)
     {
@@ -25,6 +26,18 @@ public class FriendManager(IFriendRepository friendRepository, IUserRepository u
         {
             logger.LogWarning($"AddAsync: Friend relationship between {friendUserDto.UserId} and {friendUserDto.FriendId} already exists");
             throw new UserServiceException("Пользователь уже находится в списке друзей или заявка уже отправлена", 409);
+        }
+        if (await enemyRepository.ExistsAsync(friendUserDto.UserId, friendUserDto.FriendId, ct))
+        {
+            var dto = new EnemyUserDTO(friendUserDto.UserId, friendUserDto.FriendId);
+            await enemyRepository.DeleteAsync(mapper.Map<EnemyUser>(dto), ct);
+        }
+
+        if (await enemyRepository.ExistsAsync(friendUserDto.FriendId, friendUserDto.UserId, ct))
+        {
+            logger.LogWarning(
+                $"AddAsync: Cannot send friend request from user {friendUserDto.UserId} to {friendUserDto.FriendId} — target user has added sender to enemies list");
+            throw new UserServiceException("Невозможно отправить заявку: вы находитель в списке врагов пользователя.", 403);
         }
         var friend = await friendRepository.AddAsync(mapper.Map<FriendUser>(friendUserDto), ct);
         logger.LogInformation($"User with Id {friendUserDto.UserId} successfully sent friend request to User with Id {friendUserDto.FriendId}");

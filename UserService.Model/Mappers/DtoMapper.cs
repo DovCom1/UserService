@@ -32,8 +32,9 @@ public class DtoMapper : Profile
         CreateMap<CreateFriendUserDTO, FriendUser>()
             .ForMember(dest => dest.Status, opt => opt.MapFrom(_ => FriendStatus.ApplicationSent));
         CreateMap<CreateEnemyUserDTO, EnemyUser>();
-        CreateMap<FriendUser, DeleteFriendUserDTO>();
+        CreateMap<DeleteFriendUserDTO, FriendUser>();
         CreateMap<EnemyUser, EnemyUserDTO>();
+        CreateMap<EnemyUserDTO, EnemyUser>();
         
         CreateMap<FriendUser, FriendUserDTO>()
             .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status.GetDescription()));
