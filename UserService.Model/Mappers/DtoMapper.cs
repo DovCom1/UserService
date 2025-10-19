@@ -14,7 +14,8 @@ public class DtoMapper : Profile
     {
         CreateMap<User, UserDTO>()
             .ForMember(dest => dest.Gender, opt => opt.MapFrom(src => src.Gender.GetDescription()))
-            .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status.GetDescription()));
+            .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status.GetDescription()))
+            .ForCtorParam("AccountCreationTime", opt => opt.MapFrom(src => DateOnly.FromDateTime(src.AccountCreationTime)));
 
         CreateMap<User, ShortUserDTO>()
             .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status.GetDescription()));

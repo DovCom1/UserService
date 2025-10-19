@@ -11,5 +11,5 @@ public record UserDTO(
     string Gender,
     string Status,
     DateOnly DateOfBirth,
-    DateTime AccountCreationTime
+    DateOnly AccountCreationTime
     );
