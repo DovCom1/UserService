@@ -61,6 +61,7 @@ public class FriendRepository(DataBaseContext context) : IFriendRepository
             .Include(f => f.Friend)
             .Include(f => f.User)
             .Select(f => f.FriendId == userId ? f.User : f.Friend)
+            .OrderBy(u => u.Id)
             .Skip(offset)
             .Take(limit);
         var friends = await query.ToListAsync(ct);
@@ -75,6 +76,7 @@ public class FriendRepository(DataBaseContext context) : IFriendRepository
             .Where(f => f.FriendId == userId && f.Status == FriendStatus.ApplicationSent)
             .Include(f => f.User)
             .Select(f => f.User)
+            .OrderBy(u => u.Id)
             .Skip(offset)
             .Take(limit);
         var friends = await query.ToListAsync(ct);
@@ -89,6 +91,7 @@ public class FriendRepository(DataBaseContext context) : IFriendRepository
             .Where(f => f.UserId == userId && f.Status == FriendStatus.ApplicationSent)
             .Include(f => f.Friend)
             .Select(f => f.Friend)
+            .OrderBy(u => u.Id)
             .Skip(offset)
             .Take(limit);
         var friends = await query.ToListAsync(ct);

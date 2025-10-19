@@ -39,6 +39,7 @@ public class EnemyRepository(DataBaseContext context) : IEnemyRepository
             .Where(e => e.UserId == userId)
             .Include(e => e.Enemy)
             .Select(e => e.Enemy)
+            .OrderBy(u => u.Id)
             .Skip(offset)
             .Take(limit);
         var enemies = await query.ToListAsync(cancellationToken);

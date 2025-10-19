@@ -38,9 +38,28 @@ public class UserRepository(DataBaseContext context) : IUserRepository
         return user;
     }
 
+    public async Task<User?> GetByUidAsync(string uid, CancellationToken ct = default)
+    {
+        var user = await context.Users
+            .AsNoTracking()
+            .FirstOrDefaultAsync(u => u.Uid == uid, ct);
+        return user;
+    }
+    
+    public async Task<(IEnumerable<User> user, int total)> GetAllByNicknameAsync(int offset, int limit, string nickname, CancellationToken ct = default)
+    {
+        var query = context.Users.AsNoTracking().OrderBy(u => u.Id);
+        var total = await query.CountAsync(ct);
+        var users = await query
+            .Skip(offset)
+            .Take(limit)
+            .ToListAsync(ct);
+        return (users, total);
+    }
+
     public async Task<(IEnumerable<User> users, int total)> GetAllAsync(int offset, int limit, CancellationToken ct = default)
     {
-        var query = context.Users.AsNoTracking();
+        var query = context.Users.AsNoTracking().OrderBy(u => u.Id);
         var total = await query.CountAsync(ct);
         var users = await query
             .Skip(offset)
