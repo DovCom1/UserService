@@ -37,6 +37,12 @@ public class UsersController(IUserManager userManager) : ControllerBase
         return Ok(user);
     }
     
+    public async Task<ActionResult<ShortUserDTO>> GetByUid(string uid, CancellationToken ct)
+    {
+        var user = await userManager.GetByUidAsync(uid, ct);
+        return Ok(user);
+    }
+    
     [HttpGet]
     public async Task<ActionResult<PagedUsersDTO>> GetAll(
         [FromQuery] int offset = 0,
@@ -62,5 +68,28 @@ public class UsersController(IUserManager userManager) : ControllerBase
     {
         await userManager.DeleteAsync(id, ct);
         return NoContent();
+    }
+
+    [HttpGet("search-api")]
+    public async Task<ActionResult<object>> Search([FromQuery] string? uid, [FromQuery] string? nickname,
+        CancellationToken ct,
+        [FromQuery] int offset = 0,
+        [FromQuery] int limit = 10)
+    {
+        if (string.IsNullOrWhiteSpace(uid) && string.IsNullOrWhiteSpace(nickname))
+        {
+            return BadRequest("Укажите Uid или Никнейм для поиска");
+        }
+        if (!string.IsNullOrWhiteSpace(uid))
+        {
+            var user = await userManager.GetByUidAsync(uid, ct);
+            return Ok(user);
+        }
+        if (!string.IsNullOrWhiteSpace(nickname))
+        {
+            var users = await userManager.GetByNickNameAsync(nickname, offset, limit, ct);
+            return Ok(users);
+        }
+        return BadRequest("Неподдерживаемый запрос");
     }
 }

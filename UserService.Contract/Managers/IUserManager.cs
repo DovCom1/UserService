@@ -10,6 +10,9 @@ public interface IUserManager
     public Task DeleteAsync(Guid id, CancellationToken ct);
     public Task<UserDTO> GetAsync(Guid id, CancellationToken ct);
     public Task<ShortUserDTO> GetShortAsync(Guid id, CancellationToken ct);
+    public Task<ShortUserDTO> GetByUidAsync(string uid, CancellationToken ct);
+    public Task<PagedUsersMainDTO> GetByNickNameAsync(string nickname, int offset, int limit,
+        CancellationToken ct);
     public Task<PagedUsersDTO> GetAllAsync(int offset, int limit, CancellationToken ct = default);
     public Task<PagedUsersMainDTO> GetAllShortAsync(int offset, int limit, CancellationToken ct = default);
 }

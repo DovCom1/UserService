@@ -74,6 +74,26 @@ public class UserManager(IUserRepository userRepository, IMapper mapper, ILogger
         }
         return mapper.Map<ShortUserDTO>(user);
     }
+
+    public async Task<ShortUserDTO> GetByUidAsync(string uid, CancellationToken ct)
+    {
+        var user = await userRepository.GetByUidAsync(uid, ct);
+        if (user == null)
+        {
+            logger.LogWarning($"DeleteAsync: User with Uid {uid} not found");
+            throw new UserServiceException("Такого пользователя не существует.", 404);
+        }
+        return mapper.Map<ShortUserDTO>(user);
+    }
+
+    public async Task<PagedUsersMainDTO> GetByNickNameAsync(string nickname, int offset, int limit,
+        CancellationToken ct)
+    {
+        ValidatePagination(offset, limit);
+        var (users, total) = await userRepository.GetByNicknameAsync(nickname, offset, limit, ct);
+        var usersDto = users.Select(user => mapper.Map<ShortUserDTO>(user));
+        return new PagedUsersMainDTO(usersDto, offset, limit,total);
+    }
     
     public async Task<PagedUsersDTO> GetAllAsync(int offset, int limit, CancellationToken ct = default)
     {

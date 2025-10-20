@@ -10,7 +10,7 @@ public interface IUserRepository
     public Task<User?> GetAsync(Guid id, CancellationToken ct = default);
     public Task<User?> GetByUidAsync(string uid, CancellationToken ct = default);
 
-    public Task<(IEnumerable<User> user, int total)> GetAllByNicknameAsync(int offset, int limit, string nickname,
+    public Task<(IEnumerable<User> user, int total)> GetByNicknameAsync(string nickname, int offset, int limit,
         CancellationToken ct = default);
     public Task<(IEnumerable<User> users, int total)> GetAllAsync(int offset, int limit, CancellationToken ct = default);
     public Task<User?> GetAsyncForUpdate(Guid id, CancellationToken ct = default);

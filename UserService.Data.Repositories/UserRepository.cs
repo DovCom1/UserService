@@ -46,7 +46,7 @@ public class UserRepository(DataBaseContext context) : IUserRepository
         return user;
     }
     
-    public async Task<(IEnumerable<User> user, int total)> GetAllByNicknameAsync(int offset, int limit, string nickname, CancellationToken ct = default)
+    public async Task<(IEnumerable<User> user, int total)> GetByNicknameAsync(string nickname, int offset, int limit, CancellationToken ct = default)
     {
         var query = context.Users.AsNoTracking().OrderBy(u => u.Id);
         var total = await query.CountAsync(ct);
