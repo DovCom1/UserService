@@ -51,6 +51,7 @@ public class UserRepository(DataBaseContext context) : IUserRepository
         var query = context.Users.AsNoTracking().OrderBy(u => u.Id);
         var total = await query.CountAsync(ct);
         var users = await query
+            .Where(u => u.Nickname == nickname)
             .Skip(offset)
             .Take(limit)
             .ToListAsync(ct);
