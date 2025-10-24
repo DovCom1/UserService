@@ -80,7 +80,7 @@ public class UserManager(IUserRepository userRepository, IMapper mapper, ILogger
         var user = await userRepository.GetByUidAsync(uid, ct);
         if (user == null)
         {
-            logger.LogWarning($"DeleteAsync: User with Uid {uid} not found");
+            logger.LogWarning($"DeleteAsync: User with Uid {Sanitizer.Sanitize(uid)} not found");
             throw new UserServiceException("Такого пользователя не существует.", 404);
         }
         return mapper.Map<ShortUserDTO>(user);
@@ -115,13 +115,13 @@ public class UserManager(IUserRepository userRepository, IMapper mapper, ILogger
     {
         if (uid != null && await userRepository.ExistsWithUidAsync(id, uid, ct))
         {
-            logger.LogWarning($"Validation failed: Uid {uid} already exists");
+            logger.LogWarning($"Validation failed: Uid {Sanitizer.Sanitize(uid)} already exists");
             throw new UserServiceException("Пользователь с таким UID уже существует.", 409);
         }
 
         if (email != null && await userRepository.ExistsWithEmailAsync(id, email, ct))
         {
-            logger.LogWarning($"Validation failed: Email {email} already exists");
+            logger.LogWarning($"Validation failed: Email uniqueness constraint violated for user {id}");
             throw new UserServiceException("Этот адрес электронной почты уже привязан в другой учётной записи.", 409);
         }
     }

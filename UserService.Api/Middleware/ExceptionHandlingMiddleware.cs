@@ -1,5 +1,6 @@
 ﻿using System.Text.Json;
 using UserService.Model.Exceptions;
+using UserService.Model.Utilities;
 
 namespace UserService.Api.Middleware;
 
@@ -16,7 +17,7 @@ public class ExceptionHandlingMiddleware(RequestDelegate next, ILogger<Exception
             if (ex is not UserServiceException)
             {
                 logger.LogError(ex,
-                    $"Unhandled exception occurred for {httpContext.Request.Method} {httpContext.Request.Path}");
+                    $"Unhandled exception occurred for {Sanitizer.Sanitize(httpContext.Request.Method)} {Sanitizer.Sanitize(httpContext.Request.Path)}");
             }
             await HandleExceptionAsync(httpContext, ex);
         }
