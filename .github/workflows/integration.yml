@@ -23,23 +23,18 @@ jobs:
                 registry: ${{ env.REGISTRY }}
                 username: ${{ github.actor }}
                 password: ${{ secrets.GITHUB_TOKEN }}
-      
-            - name: Extract metadata (tags, labels) for Docker
-              id: meta
-              uses: docker/metadata-action@9ec57ed1fcdbf14dcef7dfbe97b2010124a938b7
-              with:
-                images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
 
             - name: Set up QEMU
               uses: docker/setup-qemu-action@v3
-
-            - name: Set up Docker Compose
-              uses: docker/setup-compose-action@v1
-            
-            - name: Build and push Docker image
-              uses: docker/build-push-action@v6
-              with:
-                context: .
-                push: true
-                tags: ${{ steps.meta.outputs.tags }}
-                labels: ${{ steps.meta.outputs.labels }}
+              
+            - name: Set up Docker Buildx
+              uses: docker/setup-buildx-action@v3
+              
+            - name: Set up Docker Compose  
+              uses: docker/setup-compose-action@v3
+              
+            - name: Build and push with Buildx via Compose
+              run: |
+                # Используем buildx через DOCKER_BUILDKIT
+                DOCKER_BUILDKIT=1 docker compose build
+                docker compose push
