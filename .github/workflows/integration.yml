@@ -31,7 +31,7 @@ jobs:
               uses: docker/setup-buildx-action@v3
               
             - name: Set up Docker Compose  
-              uses: docker/setup-compose-action@v3
+              uses: docker/setup-compose-action@v1
               
             - name: Build and push with Buildx via Compose
               run: |
