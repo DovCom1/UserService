@@ -27,7 +27,6 @@ services:
       - ASPNETCORE_ENVIRONMENT=Development
     depends_on:
       - db
-      
 
 volumes:
   pgdata:
