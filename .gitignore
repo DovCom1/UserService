@@ -16,3 +16,4 @@
 **/dataSources.local.xml
 **/UserService.Data/obj/**
 **/UserService.Data/obj/Debug
+**/docker-compose-local.yml
