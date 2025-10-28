@@ -1,0 +1,37 @@
+@startuml UserServiceErd
+
+hide circle
+skinparam linetype ortho
+
+entity "Пользователи (Users)" as users {
+    * id : UUID <<PK>>
+    --
+    * uid : VARCHAR(10) <<unique>>
+    * nickname : VARCHAR(50)
+    * email : VARCHAR(128) <<unique>>
+      avatar_url : VARCHAR(255) <<default "/путь до дефолтного аватара">>
+    * gender : SMALLINT <<1=Мужской, 2=Женский>>
+    * status : SMALLINT <<1=В сети, 2=Не активен, 3=Не беспокоить, 4=Не в сети>>
+    * date_of_birth : DATE
+      account_creation_date : TIMESTAMP <<default CURRENT_TIMESTAMP>>
+}
+
+entity "Друзья (Friends)" as friends {
+    * user_id : UUID <<PK>> <<FK>>
+    * friend_id : UUID <<PK>> <<FK>>
+    --
+      status : SMALLINT <<1=Заявка отправлена, 2=Друг, 3=Заявка отклонена, default 1>>
+}
+
+entity "Враги (Enemies)" as enemies {
+    * user_id : UUID <<PK>> <<FK>>
+    * enemy_id : UUID <<PK>> <<FK>>
+}
+
+users ||--o{ friends : user <<ON DELETE CASCADE>>
+users ||--o{ friends : friend <<ON DELETE CASCADE>>
+users ||--o{ enemies : user <<ON DELETE CASCADE>>
+users ||--o{ enemies : enemy <<ON DELETE CASCADE>>
+
+
+@enduml
