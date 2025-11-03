@@ -19,12 +19,12 @@ public class FriendManager(IFriendRepository friendRepository, IUserRepository u
         await CheckUserExists(friendUserDto.FriendId, ct);
         if (friendUserDto.UserId == friendUserDto.FriendId)
         {
-            logger.LogWarning($"AddAsync: UserId {friendUserDto.UserId} cannot add self as friend");
+            logger.LogWarning($"FriendManager(Add): UserId {friendUserDto.UserId} cannot add self as friend");
             throw new UserServiceException("Нельзя добавить себя в друзья.", 400);
         }
         if (await friendRepository.ExistsAsync(friendUserDto.UserId, friendUserDto.FriendId, ct))
         {
-            logger.LogWarning($"AddAsync: Friend relationship between {friendUserDto.UserId} and {friendUserDto.FriendId} already exists");
+            logger.LogWarning($"FriendManager(Add): Friend relationship between {friendUserDto.UserId} and {friendUserDto.FriendId} already exists");
             throw new UserServiceException("Пользователь уже находится в списке друзей или заявка уже отправлена", 409);
         }
         if (await enemyRepository.ExistsAsync(friendUserDto.UserId, friendUserDto.FriendId, ct))
@@ -36,7 +36,7 @@ public class FriendManager(IFriendRepository friendRepository, IUserRepository u
         if (await enemyRepository.ExistsAsync(friendUserDto.FriendId, friendUserDto.UserId, ct))
         {
             logger.LogWarning(
-                $"AddAsync: Cannot send friend request from user {friendUserDto.UserId} to {friendUserDto.FriendId} — target user has added sender to enemies list");
+                $"FriendManager(Add): Cannot send friend request from user {friendUserDto.UserId} to {friendUserDto.FriendId} — target user has added sender to enemies list");
             throw new UserServiceException("Невозможно отправить заявку: вы находитель в списке врагов пользователя.", 403);
         }
         var friend = await friendRepository.AddAsync(mapper.Map<FriendUser>(friendUserDto), ct);
@@ -52,7 +52,7 @@ public class FriendManager(IFriendRepository friendRepository, IUserRepository u
         var friendUser = await friendRepository.UpdateAsync(mapper.Map<FriendUser>(friendUserDto), ct);
         if (friendUser == null)
         {
-            logger.LogWarning($"UpdateAsync: Friend relationship with UserId {friendUserDto.UserId} and FriendId {friendUserDto.FriendId} not found");
+            logger.LogWarning($"FriendManager(Update): Friend relationship with UserId {friendUserDto.UserId} and FriendId {friendUserDto.FriendId} not found");
             throw new UserServiceException("Этой заявки в друзья не существует", 404);
         }
         logger.LogInformation($"User with Id {friendUserDto.FriendId} successfully accepted friend request from User with Id {friendUserDto.UserId}");
@@ -65,7 +65,7 @@ public class FriendManager(IFriendRepository friendRepository, IUserRepository u
         await CheckUserExists(friendUserDto.FriendId, ct);
         if (!await friendRepository.DeleteAsync(mapper.Map<FriendUser>(friendUserDto), ct))
         {
-            logger.LogWarning($"DeleteAsync: Friend request from User with Id {friendUserDto.FriendId} to User with Id {friendUserDto.UserId} not found");
+            logger.LogWarning($"FriendManager(RejectFriendRequest): Friend request from User with Id {friendUserDto.FriendId} to User with Id {friendUserDto.UserId} not found");
             throw new UserServiceException("Такой заявки не существует", 404);
         }
         logger.LogInformation($"User with Id {friendUserDto.FriendId} successfully rejected friend request from User with Id {friendUserDto.UserId}");
@@ -77,7 +77,7 @@ public class FriendManager(IFriendRepository friendRepository, IUserRepository u
         await CheckUserExists(friendUserDto.FriendId, ct);
         if (!await friendRepository.DeleteAsync(mapper.Map<FriendUser>(friendUserDto), ct))
         {
-            logger.LogWarning($"DeleteAsync: Friend relationship with UserId {friendUserDto.UserId} and FriendId {friendUserDto.FriendId} not found");
+            logger.LogWarning($"FriendManager(Delete): Friend relationship with UserId {friendUserDto.UserId} and FriendId {friendUserDto.FriendId} not found");
             throw new UserServiceException("Пользователь не находится в списке ваших друзей", 404);
         }
         logger.LogInformation($"User with Id {friendUserDto.UserId} successfully deleted User with Id {friendUserDto.FriendId} from friends");

@@ -19,12 +19,12 @@ public class EnemyManager(IEnemyRepository enemyRepository, IUserRepository user
         await CheckUserExists(enemyUserDto.EnemyId, ct);
         if (enemyUserDto.UserId == enemyUserDto.EnemyId)
         {
-            logger.LogWarning($"AddAsync: UserId {enemyUserDto.UserId} cannot add self as enemy");
+            logger.LogWarning($"EnemyManager(Add): UserId {enemyUserDto.UserId} cannot add self as enemy");
             throw new UserServiceException("Нельзя добавить себя в список врагов.", 400);
         }
         if (await enemyRepository.ExistsAsync(enemyUserDto.UserId, enemyUserDto.EnemyId, ct))
         {
-            logger.LogWarning($"AddAsync: Enemy relationship between {enemyUserDto.UserId} and {enemyUserDto.EnemyId} already exists");
+            logger.LogWarning($"EnemyManager(Add): Enemy relationship between {enemyUserDto.UserId} and {enemyUserDto.EnemyId} already exists");
             throw new UserServiceException("Пользователь уже находится в списке врагов", 409);
         }
         if (await friendRepository.ExistsAsync(enemyUserDto.UserId, enemyUserDto.EnemyId, ct))
@@ -50,7 +50,7 @@ public class EnemyManager(IEnemyRepository enemyRepository, IUserRepository user
         await CheckUserExists(enemyUserDto.EnemyId, ct);
         if (!await enemyRepository.DeleteAsync(mapper.Map<EnemyUser>(enemyUserDto), ct))
         {
-            logger.LogWarning($"DeleteAsync: Enemy relationship with UserId {enemyUserDto.UserId} and EnemyId {enemyUserDto.EnemyId} not found");
+            logger.LogWarning($"EnemyManager(Delete): Enemy relationship with UserId {enemyUserDto.UserId} and EnemyId {enemyUserDto.EnemyId} not found");
             throw new UserServiceException("Пользователь не находится в списке ваших врагов", 404);
         }
         logger.LogInformation($"User with Id {enemyUserDto.UserId} successfully deleted User with Id {enemyUserDto.EnemyId} from enemies");
