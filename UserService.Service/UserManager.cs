@@ -29,7 +29,7 @@ public class UserManager(IUserRepository userRepository, IMapper mapper, ILogger
         var user = await userRepository.GetAsyncForUpdate(id, ct);
         if (user == null)
         {
-            logger.LogWarning($"DeleteAsync: User with Id {id} not found");
+            logger.LogWarning($"UserManager(Update): User with Id {id} not found");
             throw new UserServiceException("Такого пользователя не существует.", 404);
         }
         if (userDto.Uid != null) user.Uid = userDto.Uid;
@@ -47,7 +47,7 @@ public class UserManager(IUserRepository userRepository, IMapper mapper, ILogger
     {
         if (!await userRepository.DeleteAsync(id, ct))
         {
-            logger.LogWarning($"DeleteAsync: User with Id {id} not found");
+            logger.LogWarning($"UserManager(Delete): User with Id {id} not found");
             throw new UserServiceException("Такого пользователя не существует.", 404);
         }
         logger.LogInformation($"User with Id {id} successfully deleted");
@@ -58,7 +58,7 @@ public class UserManager(IUserRepository userRepository, IMapper mapper, ILogger
         var user = await userRepository.GetAsync(id, ct);
         if (user == null)
         {
-            logger.LogWarning($"DeleteAsync: User with Id {id} not found");
+            logger.LogWarning($"UserManager(Get): User with Id {id} not found");
             throw new UserServiceException("Такого пользователя не существует.", 404);
         }
         return mapper.Map<UserDTO>(user);
@@ -69,7 +69,7 @@ public class UserManager(IUserRepository userRepository, IMapper mapper, ILogger
         var user = await userRepository.GetAsync(id, ct);
         if (user == null)
         {
-            logger.LogWarning($"DeleteAsync: User with Id {id} not found");
+            logger.LogWarning($"UserManager(GetShort): User with Id {id} not found");
             throw new UserServiceException("Такого пользователя не существует.", 404);
         }
         return mapper.Map<ShortUserDTO>(user);
@@ -80,7 +80,7 @@ public class UserManager(IUserRepository userRepository, IMapper mapper, ILogger
         var user = await userRepository.GetByUidAsync(uid, ct);
         if (user == null)
         {
-            logger.LogWarning($"DeleteAsync: User with Uid {Sanitizer.Sanitize(uid)} not found");
+            logger.LogWarning($"UserManager(GetByUid): User with Uid {Sanitizer.Sanitize(uid)} not found");
             throw new UserServiceException("Такого пользователя не существует.", 404);
         }
         return mapper.Map<ShortUserDTO>(user);

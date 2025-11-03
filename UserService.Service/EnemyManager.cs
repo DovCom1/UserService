@@ -15,8 +15,8 @@ public class EnemyManager(IEnemyRepository enemyRepository, IUserRepository user
 {
     public async Task<EnemyUserDTO> AddAsync(CreateEnemyUserDTO enemyUserDto, CancellationToken ct)
     {
-        await CheckUserExists(enemyUserDto.UserId, "AddAsync", ct);
-        await CheckUserExists(enemyUserDto.EnemyId, "AddAsync", ct);
+        await CheckUserExists(enemyUserDto.UserId, ct);
+        await CheckUserExists(enemyUserDto.EnemyId, ct);
         if (enemyUserDto.UserId == enemyUserDto.EnemyId)
         {
             logger.LogWarning($"AddAsync: UserId {enemyUserDto.UserId} cannot add self as enemy");
@@ -39,15 +39,15 @@ public class EnemyManager(IEnemyRepository enemyRepository, IUserRepository user
 
     public async Task<bool> ExistsAsync(Guid userId, Guid enemyId, CancellationToken ct)
     {
-        await CheckUserExists(userId, "ExistsAsync", ct);
-        await CheckUserExists(enemyId, "ExistsAsync", ct);
+        await CheckUserExists(userId, ct);
+        await CheckUserExists(enemyId, ct);
         return await enemyRepository.ExistsAsync(userId, enemyId, ct);
     }
 
     public async Task DeleteAsync(EnemyUserDTO enemyUserDto, CancellationToken ct)
     {
-        await CheckUserExists(enemyUserDto.UserId, "DeleteAsync", ct);
-        await CheckUserExists(enemyUserDto.EnemyId, "DeleteAsync", ct);
+        await CheckUserExists(enemyUserDto.UserId, ct);
+        await CheckUserExists(enemyUserDto.EnemyId, ct);
         if (!await enemyRepository.DeleteAsync(mapper.Map<EnemyUser>(enemyUserDto), ct))
         {
             logger.LogWarning($"DeleteAsync: Enemy relationship with UserId {enemyUserDto.UserId} and EnemyId {enemyUserDto.EnemyId} not found");
@@ -60,7 +60,7 @@ public class EnemyManager(IEnemyRepository enemyRepository, IUserRepository user
         CancellationToken ct = default)
     {
         ValidatePagination(offset, limit);
-        await CheckUserExists(userId, "GetEnemiesAsync", ct);
+        await CheckUserExists(userId, ct);
         var (enemies, total) = await enemyRepository.GetEnemiesAsync(userId, offset, limit, ct);
         var data = enemies.Select(enemy => new ShortUserDTO(
             Id: enemy.Id,
@@ -72,11 +72,11 @@ public class EnemyManager(IEnemyRepository enemyRepository, IUserRepository user
         return new PagedEnemyResponseDTO(data, offset, limit, total);
     }
     
-    private async Task CheckUserExists(Guid userId, string methodName, CancellationToken ct)
+    private async Task CheckUserExists(Guid userId, CancellationToken ct)
     {
         if (!await userRepository.ExistsAsync(userId, ct))
         {
-            logger.LogWarning($"{methodName}: User with Id {userId} not found");
+            logger.LogWarning($"EnemyManager: User with Id {userId} not found");
             throw new UserServiceException("Пользователь не существует.", 404);
         }
     }
