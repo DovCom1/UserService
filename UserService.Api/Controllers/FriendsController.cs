@@ -10,7 +10,7 @@ namespace UserService.Api.Controllers;
 public class FriendsController(IFriendManager friendManager) : ControllerBase
 {
     [HttpPost("{friendId:guid}")]
-    public async Task<ActionResult<FriendUserDTO>> AddFriend(Guid userId, Guid friendId, CancellationToken ct)
+    public async Task<ActionResult<FriendUserDTO>> AddFriend([FromRoute] Guid userId, [FromRoute] Guid friendId, CancellationToken ct)
     {
         var dto = new CreateFriendUserDTO(userId, friendId);
         var result = await friendManager.SendRequestAsync(dto, ct);
@@ -18,7 +18,7 @@ public class FriendsController(IFriendManager friendManager) : ControllerBase
     }
 
     [HttpPatch("{friendId:guid}/accept")]
-    public async Task<ActionResult<FriendUserDTO>> AcceptRequest(Guid userId, Guid friendId, CancellationToken ct)
+    public async Task<ActionResult<FriendUserDTO>> AcceptRequest([FromRoute] Guid userId, [FromRoute] Guid friendId, CancellationToken ct)
     {
         var dto = new UpdateFriendUserDTO(userId, friendId, "Друг");
         var result = await friendManager.AcceptFriendRequestAsync(dto, ct);
@@ -26,7 +26,7 @@ public class FriendsController(IFriendManager friendManager) : ControllerBase
     }
 
     [HttpPatch("{friendId:guid}/reject")]
-    public async Task<ActionResult> RejectRequest(Guid userId, Guid friendId, CancellationToken ct)
+    public async Task<ActionResult> RejectRequest([FromRoute] Guid userId, [FromRoute] Guid friendId, CancellationToken ct)
     {
         var dto = new DeleteFriendUserDTO(userId, friendId);
         await friendManager.RejectFriendRequestAsync(dto, ct);
@@ -34,7 +34,7 @@ public class FriendsController(IFriendManager friendManager) : ControllerBase
     }
 
     [HttpDelete("{friendId:guid}")]
-    public async Task<ActionResult> DeleteFriend(Guid userId, Guid friendId, CancellationToken ct)
+    public async Task<ActionResult> DeleteFriend([FromRoute] Guid userId, [FromRoute] Guid friendId, CancellationToken ct)
     {
         var dto = new DeleteFriendUserDTO(userId, friendId);
         await friendManager.DeleteAsync(dto, ct);
@@ -42,14 +42,14 @@ public class FriendsController(IFriendManager friendManager) : ControllerBase
     }
     
     [HttpGet("{friendId:guid}/exists")]
-    public async Task<ActionResult> CheckFriendExists(Guid userId, Guid friendId, CancellationToken ct)
+    public async Task<ActionResult> CheckFriendExists([FromRoute] Guid userId, [FromRoute] Guid friendId, CancellationToken ct)
     {
         var exists = await friendManager.CheckFriendExists(userId, friendId, ct);
         return Ok(new { exists });
     }
     
-    [HttpGet("")]
-    public async Task<ActionResult<PagedFriendResponseDTO>> GetFriends(Guid userId,
+    [HttpGet]
+    public async Task<ActionResult<PagedFriendResponseDTO>> GetFriends([FromRoute] Guid userId,
         CancellationToken ct, [FromQuery] int offset = 0, [FromQuery] int limit = 10)
     {
         var result = await friendManager.GetFriendsAsync(userId, offset, limit, ct);
@@ -57,7 +57,7 @@ public class FriendsController(IFriendManager friendManager) : ControllerBase
     }
     
     [HttpGet("requests/incoming")]
-    public async Task<ActionResult<PagedFriendResponseDTO>> GetIncomingRequests(Guid userId,
+    public async Task<ActionResult<PagedFriendResponseDTO>> GetIncomingRequests([FromRoute] Guid userId,
         CancellationToken ct, [FromQuery] int offset = 0, [FromQuery] int limit = 10)
     {
         var result = await friendManager.GetIncomingRequestsAsync(userId, offset, limit, ct);
@@ -65,7 +65,7 @@ public class FriendsController(IFriendManager friendManager) : ControllerBase
     }
     
     [HttpGet("requests/outgoing")]
-    public async Task<ActionResult<PagedFriendResponseDTO>> GetOutcomingRequests(Guid userId,
+    public async Task<ActionResult<PagedFriendResponseDTO>> GetOutcomingRequests([FromRoute] Guid userId,
         CancellationToken ct, [FromQuery] int offset = 0, [FromQuery] int limit = 10)
     {
         var result = await friendManager.GetOutcomingRequestsAsync(userId, offset, limit, ct);

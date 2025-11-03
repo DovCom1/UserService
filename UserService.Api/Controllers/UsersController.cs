@@ -16,7 +16,7 @@ public class UsersController(IUserManager userManager) : ControllerBase
     }
 
     [HttpPatch("{id:guid}")]
-    public async Task<ActionResult<UserDTO>> Update(Guid id, [FromBody] UpdateUserDTO userDto, CancellationToken ct)
+    public async Task<ActionResult<UserDTO>> Update([FromRoute] Guid id, [FromBody] UpdateUserDTO userDto, CancellationToken ct)
     {
         var user = await userManager.UpdateAsync(userDto, id, ct);
         return Ok(user);
@@ -24,22 +24,16 @@ public class UsersController(IUserManager userManager) : ControllerBase
     
 
     [HttpGet("{id:guid}")]
-    public async Task<ActionResult<UserDTO>> Get(Guid id, CancellationToken ct)
+    public async Task<ActionResult<UserDTO>> Get([FromRoute] Guid id, CancellationToken ct)
     {
         var user = await userManager.GetAsync(id, ct);
         return Ok(user);
     }
     
     [HttpGet("{id:guid}/main")]
-    public async Task<ActionResult<ShortUserDTO>> GetMain(Guid id, CancellationToken ct)
+    public async Task<ActionResult<ShortUserDTO>> GetMain([FromRoute] Guid id, CancellationToken ct)
     {
         var user = await userManager.GetShortAsync(id, ct);
-        return Ok(user);
-    }
-    
-    public async Task<ActionResult<ShortUserDTO>> GetByUid(string uid, CancellationToken ct)
-    {
-        var user = await userManager.GetByUidAsync(uid, ct);
         return Ok(user);
     }
     
@@ -64,7 +58,7 @@ public class UsersController(IUserManager userManager) : ControllerBase
     }
 
     [HttpDelete("{id:guid}")]
-    public async Task<ActionResult> Delete(Guid id, CancellationToken ct)
+    public async Task<ActionResult> Delete([FromRoute] Guid id, CancellationToken ct)
     {
         await userManager.DeleteAsync(id, ct);
         return NoContent();

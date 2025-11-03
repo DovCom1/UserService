@@ -7,11 +7,11 @@ public class EnumDescriptionAttribute(Type enumType) : ValidationAttribute
 {
     private static readonly ConcurrentDictionary<Type, List<string>> Cache = new();
 
-    protected override ValidationResult IsValid(object? value, ValidationContext validationContext)
+    protected override ValidationResult IsValid(object? valueFromDto, ValidationContext validationContext)
     {
-        if (value == null) return ValidationResult.Success!;
+        if (valueFromDto == null) return ValidationResult.Success!;
         
-        var strValue = value.ToString();
+        var strValue = valueFromDto.ToString();
         if (string.IsNullOrEmpty(strValue)) 
             return new ValidationResult($"Значение для {validationContext.DisplayName} не может быть пустым.");
         

@@ -9,7 +9,7 @@ namespace UserService.Api.Controllers;
 public class EnemiesController(IEnemyManager enemyManager) : ControllerBase
 {
     [HttpPost("{enemyId:guid}")]
-    public async Task<ActionResult<EnemyUserDTO>> AddEnemy(Guid userId, Guid enemyId, CancellationToken ct)
+    public async Task<ActionResult<EnemyUserDTO>> AddEnemy([FromRoute] Guid userId, [FromRoute] Guid enemyId, CancellationToken ct)
     {
         var dto = new CreateEnemyUserDTO(userId, enemyId);
         var result = await enemyManager.AddAsync(dto, ct);
@@ -17,7 +17,7 @@ public class EnemiesController(IEnemyManager enemyManager) : ControllerBase
     }
     
     [HttpDelete("{enemyId:guid}")]
-    public async Task<ActionResult> DeleteEnemy(Guid userId, Guid enemyId, CancellationToken ct)
+    public async Task<ActionResult> DeleteEnemy([FromRoute] Guid userId, [FromRoute] Guid enemyId, CancellationToken ct)
     {
         var dto = new EnemyUserDTO(userId, enemyId);
         await enemyManager.DeleteAsync(dto, ct);
@@ -25,14 +25,14 @@ public class EnemiesController(IEnemyManager enemyManager) : ControllerBase
     }
     
     [HttpGet("{enemyId:guid}/exists")]
-    public async Task<ActionResult> CheckEnemyExists(Guid userId, Guid enemyId, CancellationToken ct)
+    public async Task<ActionResult> CheckEnemyExists([FromRoute] Guid userId, [FromRoute] Guid enemyId, CancellationToken ct)
     {
         var exists = await enemyManager.ExistsAsync(userId, enemyId, ct);
         return Ok(new { exists });
     }
 
-    [HttpGet("")]
-    public async Task<ActionResult<PagedEnemyResponseDTO>> GetEnemies(Guid userId,
+    [HttpGet]
+    public async Task<ActionResult<PagedEnemyResponseDTO>> GetEnemies([FromRoute] Guid userId,
         CancellationToken ct, [FromQuery] int offset = 0, [FromQuery] int limit = 10)
     {
         var result = await enemyManager.GetEnemiesAsync(userId, offset, limit, ct);
