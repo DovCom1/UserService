@@ -94,14 +94,6 @@ public class UserManager(IUserRepository userRepository, IMapper mapper, ILogger
         var usersDto = users.Select(user => mapper.Map<ShortUserDTO>(user));
         return new PagedUsersMainDTO(usersDto, offset, limit,total);
     }
-    
-    public async Task<PagedUsersDTO> GetAllAsync(int offset, int limit, CancellationToken ct)
-    {
-        ValidatePagination(offset, limit);
-        var (users, total) = await userRepository.GetAllAsync(offset, limit, ct);
-        var userDtos = users.Select(user => mapper.Map<UserDTO>(user));
-        return new PagedUsersDTO(userDtos, offset, limit, total);
-    }
 
     public async Task<PagedUsersMainDTO> GetAllShortAsync(int offset, int limit, CancellationToken ct)
     {
