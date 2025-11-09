@@ -44,7 +44,7 @@ public class FriendsController(IFriendManager friendManager) : ControllerBase
     [HttpGet("{friendId:guid}/exists")]
     public async Task<ActionResult> CheckFriendExists([FromRoute] Guid userId, [FromRoute] Guid friendId, CancellationToken ct)
     {
-        var exists = await friendManager.CheckFriendExists(userId, friendId, ct);
+        var exists = await friendManager.ExistsAcceptedFriendAsync(userId, friendId, ct);
         return Ok(new { exists });
     }
     

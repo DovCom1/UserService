@@ -13,6 +13,7 @@ public interface IUserManager
     public Task<ShortUserDTO> GetByUidAsync(string uid, CancellationToken ct);
     public Task<PagedUsersMainDTO> GetByNickNameAsync(string nickname, int offset, int limit,
         CancellationToken ct);
-    public Task<PagedUsersDTO> GetAllAsync(int offset, int limit, CancellationToken ct = default);
-    public Task<PagedUsersMainDTO> GetAllShortAsync(int offset, int limit, CancellationToken ct = default);
+    public Task<PagedUsersDTO> GetAllAsync(int offset, int limit, CancellationToken ct);
+    public Task<PagedUsersMainDTO> GetAllShortAsync(int offset, int limit, CancellationToken ct);
+    public Task ExistsAsync(Guid userId, CancellationToken ct);
 }

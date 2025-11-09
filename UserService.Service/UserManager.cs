@@ -95,7 +95,7 @@ public class UserManager(IUserRepository userRepository, IMapper mapper, ILogger
         return new PagedUsersMainDTO(usersDto, offset, limit,total);
     }
     
-    public async Task<PagedUsersDTO> GetAllAsync(int offset, int limit, CancellationToken ct = default)
+    public async Task<PagedUsersDTO> GetAllAsync(int offset, int limit, CancellationToken ct)
     {
         ValidatePagination(offset, limit);
         var (users, total) = await userRepository.GetAllAsync(offset, limit, ct);
@@ -103,12 +103,21 @@ public class UserManager(IUserRepository userRepository, IMapper mapper, ILogger
         return new PagedUsersDTO(userDtos, offset, limit, total);
     }
 
-    public async Task<PagedUsersMainDTO> GetAllShortAsync(int offset, int limit, CancellationToken ct = default)
+    public async Task<PagedUsersMainDTO> GetAllShortAsync(int offset, int limit, CancellationToken ct)
     {
         ValidatePagination(offset, limit);
         var (users, total) = await userRepository.GetAllAsync(offset, limit, ct);
         var shortUserDtos = users.Select(user => mapper.Map<ShortUserDTO>(user));
         return new PagedUsersMainDTO(shortUserDtos, offset, limit, total);
+    }
+    
+    public async Task ExistsAsync(Guid userId, CancellationToken ct)
+    {
+        if (!await userRepository.ExistsAsync(userId, ct))
+        {
+            logger.LogWarning($"FriendManager: User with Id {userId} not found");
+            throw new UserServiceException("Пользователь не существует.", 404);
+        }
     }
     
     private async Task ValidateUidAndEmail(Guid id, string? uid, string? email, CancellationToken ct)

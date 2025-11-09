@@ -21,6 +21,7 @@ builder.Services.AddAutoMapper(cfg =>
 
 builder.Services.AddControllers();
 
+builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo 
@@ -39,8 +40,6 @@ builder.Services.AddScoped<IUserManager, UserManager>();
 builder.Services.AddScoped<IFriendManager, FriendManager>();
 builder.Services.AddScoped<IEnemyManager, EnemyManager>();
 
-builder.Services.AddEndpointsApiExplorer();
-
 var app = builder.Build();
 
 app.UseMiddleware<ExceptionHandlingMiddleware>();
@@ -53,7 +52,6 @@ if (app.Environment.IsDevelopment())
         c.RoutePrefix = "swagger";
     });
 }
-
 app.UseRouting();
 app.MapControllers();
 app.Run();

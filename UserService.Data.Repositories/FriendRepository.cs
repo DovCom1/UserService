@@ -60,8 +60,9 @@ public class FriendRepository(DataBaseContext context) : IFriendRepository
             .Where(f => (f.UserId == userId || f.FriendId == userId) && f.Status == FriendStatus.Friend)
             .Include(f => f.Friend)
             .Include(f => f.User)
+            .OrderBy(f => f.UserId)
+            .ThenBy(f => f.FriendId)
             .Select(f => f.FriendId == userId ? f.User : f.Friend)
-            .OrderBy(u => u.Id)
             .Skip(offset)
             .Take(limit);
         var friends = await query.ToListAsync(ct);
