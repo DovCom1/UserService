@@ -22,17 +22,17 @@ public class FriendManager(IFriendRepository friendRepository, IUserManager user
             logger.LogWarning($"FriendManager(Add): UserId {friendUserDto.UserId} cannot add self as friend");
             throw new UserServiceException("Нельзя добавить себя в друзья.", 400);
         }
-        if (await enemyRepository.ExistsAsync(friendUserDto.UserId, friendUserDto.FriendId, ct))
+        if (await enemyRepository.IsEnemy(friendUserDto.UserId, friendUserDto.FriendId, ct))
         {
             var dto = new EnemyUserDTO(friendUserDto.UserId, friendUserDto.FriendId);
             await enemyRepository.DeleteAsync(mapper.Map<EnemyUser>(dto), ct);
         }
-        if (await friendRepository.ExistsAsync(friendUserDto.UserId, friendUserDto.FriendId, ct))
+        if (await friendRepository.IsPendingOrAccepted(friendUserDto.UserId, friendUserDto.FriendId, ct))
         {
             logger.LogWarning($"FriendManager(Add): Friend relationship between {friendUserDto.UserId} and {friendUserDto.FriendId} already exists");
             throw new UserServiceException("Пользователь уже находится в списке друзей или заявка уже отправлена", 409);
         }
-        if (await enemyRepository.ExistsAsync(friendUserDto.FriendId, friendUserDto.UserId, ct))
+        if (await enemyRepository.IsEnemy(friendUserDto.FriendId, friendUserDto.UserId, ct))
         {
             logger.LogWarning(
                 $"FriendManager(Add): Cannot send friend request from user {friendUserDto.UserId} to {friendUserDto.FriendId} — target user has added sender to enemies list");
@@ -82,18 +82,18 @@ public class FriendManager(IFriendRepository friendRepository, IUserManager user
         logger.LogInformation($"User with Id {friendUserDto.UserId} successfully deleted User with Id {friendUserDto.FriendId} from friends");
     }
 
-    public async Task<bool> ExistsAcceptedFriendAsync(Guid userId, Guid friendId, CancellationToken ct)
+    public async Task<bool> IsAcceptedFriendAsync(Guid userId, Guid friendId, CancellationToken ct)
     {
         await userManager.ExistsAsync(userId, ct);
         await userManager.ExistsAsync(friendId, ct);
-        return await friendRepository.ExistsAcceptedFriendAsync(userId, friendId, ct);
+        return await friendRepository.IsAcceptedAsync(userId, friendId, ct);
     }
     
-    public async Task<bool> ExistsAsync(Guid userId, Guid friendId, CancellationToken ct)
+    public async Task<bool> IsPendingOrAcceptedFriendAsync(Guid userId, Guid friendId, CancellationToken ct)
     {
         await userManager.ExistsAsync(userId, ct);
         await userManager.ExistsAsync(friendId, ct);
-        return await friendRepository.ExistsAsync(userId, friendId, ct);
+        return await friendRepository.IsPendingOrAccepted(userId, friendId, ct);
     }
 
     public async Task<PagedFriendResponseDTO> GetFriendsAsync(Guid userId, int offset, int limit, CancellationToken ct)

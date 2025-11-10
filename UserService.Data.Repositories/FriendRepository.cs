@@ -26,7 +26,7 @@ public class FriendRepository(DataBaseContext context) : IFriendRepository
         return friendUser;
     }
 
-    public async Task<bool> ExistsAcceptedFriendAsync(Guid userId, Guid friendId, CancellationToken ct = default)
+    public async Task<bool> IsAcceptedAsync(Guid userId, Guid friendId, CancellationToken ct = default)
     {
         var exists = await context.Friends.AsNoTracking()
                 .AnyAsync(f => (f.UserId == friendId && f.FriendId == userId 
@@ -34,7 +34,7 @@ public class FriendRepository(DataBaseContext context) : IFriendRepository
         return exists;
     }
 
-    public async Task<bool> ExistsAsync(Guid userId, Guid friendId, CancellationToken ct = default)
+    public async Task<bool> IsPendingOrAccepted(Guid userId, Guid friendId, CancellationToken ct = default)
     {
         return await context.Friends.AsNoTracking().AnyAsync(f =>
             (f.UserId == userId && f.FriendId == friendId)

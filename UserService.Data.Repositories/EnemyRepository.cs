@@ -16,7 +16,7 @@ public class EnemyRepository(DataBaseContext context) : IEnemyRepository
         return entity;
     }
 
-    public async Task<bool> ExistsAsync(Guid userId, Guid enemyId, CancellationToken cancellationToken = default)
+    public async Task<bool> IsEnemy(Guid userId, Guid enemyId, CancellationToken cancellationToken = default)
     {
         return await context.Enemies.AsNoTracking()
             .AnyAsync(e => e.UserId == userId && e.EnemyId == enemyId, cancellationToken);

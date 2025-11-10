@@ -27,7 +27,7 @@ public class EnemiesController(IEnemyManager enemyManager) : ControllerBase
     [HttpGet("{enemyId:guid}/exists")]
     public async Task<ActionResult> CheckEnemyExists([FromRoute] Guid userId, [FromRoute] Guid enemyId, CancellationToken ct)
     {
-        var exists = await enemyManager.ExistsAsync(userId, enemyId, ct);
+        var exists = await enemyManager.IsEnemy(userId, enemyId, ct);
         return Ok(new { exists });
     }
 

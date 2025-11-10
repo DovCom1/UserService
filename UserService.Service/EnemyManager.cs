@@ -20,12 +20,12 @@ public class EnemyManager(IEnemyRepository enemyRepository, IUserManager userMan
             logger.LogWarning($"EnemyManager(Add): UserId {enemyUserDto.UserId} cannot add self as enemy");
             throw new UserServiceException("Нельзя добавить себя в список врагов.", 400);
         }
-        if (await friendManager.ExistsAsync(enemyUserDto.UserId, enemyUserDto.EnemyId, ct))
+        if (await friendManager.IsPendingOrAcceptedFriendAsync(enemyUserDto.UserId, enemyUserDto.EnemyId, ct))
         {
             var dto = new DeleteFriendUserDTO(enemyUserDto.UserId, enemyUserDto.EnemyId);
             await friendManager.DeleteAsync(dto, ct);
         }
-        if (await enemyRepository.ExistsAsync(enemyUserDto.UserId, enemyUserDto.EnemyId, ct))
+        if (await enemyRepository.IsEnemy(enemyUserDto.UserId, enemyUserDto.EnemyId, ct))
         {
             logger.LogWarning($"EnemyManager(Add): Enemy relationship between {enemyUserDto.UserId} and {enemyUserDto.EnemyId} already exists");
             throw new UserServiceException("Пользователь уже находится в списке врагов", 409);
@@ -35,11 +35,11 @@ public class EnemyManager(IEnemyRepository enemyRepository, IUserManager userMan
         return mapper.Map<EnemyUserDTO>(enemy);
     }
 
-    public async Task<bool> ExistsAsync(Guid userId, Guid enemyId, CancellationToken ct)
+    public async Task<bool> IsEnemy(Guid userId, Guid enemyId, CancellationToken ct)
     {
         await userManager.ExistsAsync(userId, ct);
         await userManager.ExistsAsync(enemyId, ct);
-        return await enemyRepository.ExistsAsync(userId, enemyId, ct);
+        return await enemyRepository.IsEnemy(userId, enemyId, ct);
     }
 
     public async Task DeleteAsync(EnemyUserDTO enemyUserDto, CancellationToken ct)
