@@ -53,18 +53,13 @@ public class UserManager(IUserRepository userRepository, IMapper mapper, ILogger
         logger.LogInformation($"User with Id {id} successfully deleted");
     }
 
-    public async Task<UserDTO> GetAsync(Guid id, CancellationToken ct)
-    {
-        var user = await userRepository.GetAsync(id, ct);
-        if (user == null)
-        {
-            logger.LogWarning($"UserManager(Get): User with Id {id} not found");
-            throw new UserServiceException("Такого пользователя не существует.", 404);
-        }
-        return mapper.Map<UserDTO>(user);
-    }
+    public async Task<UserDTO> GetAsync(Guid id, CancellationToken ct) =>
+        mapper.Map<UserDTO>(await GetUserAsync(id, ct));
 
-    public async Task<ShortUserDTO> GetShortAsync(Guid id, CancellationToken ct)
+    public async Task<ShortUserDTO> GetShortAsync(Guid id, CancellationToken ct) =>
+        mapper.Map<ShortUserDTO>(await GetUserAsync(id, ct));
+
+    private async Task<User> GetUserAsync(Guid id, CancellationToken ct)
     {
         var user = await userRepository.GetAsync(id, ct);
         if (user == null)
@@ -72,7 +67,7 @@ public class UserManager(IUserRepository userRepository, IMapper mapper, ILogger
             logger.LogWarning($"UserManager(GetShort): User with Id {id} not found");
             throw new UserServiceException("Такого пользователя не существует.", 404);
         }
-        return mapper.Map<ShortUserDTO>(user);
+        return user;
     }
 
     public async Task<ShortUserDTO> GetByUidAsync(string uid, CancellationToken ct)

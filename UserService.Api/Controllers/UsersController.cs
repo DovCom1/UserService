@@ -22,7 +22,6 @@ public class UsersController(IUserManager userManager) : ControllerBase
         return Ok(user);
     }
     
-
     [HttpGet("{id:guid}")]
     public async Task<ActionResult<UserDTO>> Get([FromRoute] Guid id, CancellationToken ct)
     {
