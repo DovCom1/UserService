@@ -22,5 +22,5 @@ public record CreateUserDTO(
     string Gender,
     
     [Required(ErrorMessage = "Дата рождения обязательна для заполнения")]
-    DateOnly? DateOfBirth
+    DateOnly DateOfBirth
     );

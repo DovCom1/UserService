@@ -1,25 +1,23 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using AutoMapper;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using UserService.Contract.Managers;
 using UserService.Contract.Repositories;
 using UserService.Model.DTO.User;
 using UserService.Model.Entities;
-using UserService.Model.Enums;
 using UserService.Model.Exceptions;
 using UserService.Model.Utilities;
+using UserService.Service.Extensions;
 
-namespace UserService.Service;
+namespace UserService.Service.Managers;
 
-public class UserManager(IUserRepository userRepository, IMapper mapper, ILogger<UserManager> logger) : IUserManager
+public class UserManager(IUserRepository userRepository, ILogger<UserManager> logger) : IUserManager
 {
     public async Task<UserDTO> RegisterAsync(CreateUserDTO userDto, CancellationToken ct)
     {
         await ValidateUidAndEmail(Guid.Empty, userDto.Uid, userDto.Email, ct);
         ValidateDateOfBirth(userDto.DateOfBirth);
-        var user = await userRepository.AddAsync(mapper.Map<User>(userDto), ct);
+        var user = await userRepository.AddAsync(userDto.ToUser(), ct);
         logger.LogInformation($"User with Id {user.Id} successfully registered");
-        return mapper.Map<UserDTO>(user);
+        return user.ToUserDto();
     }
 
     public async Task<UserDTO> UpdateAsync(UpdateUserDTO userDto, Guid id, CancellationToken ct)
@@ -32,15 +30,9 @@ public class UserManager(IUserRepository userRepository, IMapper mapper, ILogger
             logger.LogWarning($"UserManager(Update): User with Id {id} not found");
             throw new UserServiceException("Такого пользователя не существует.", 404);
         }
-        if (userDto.Uid != null) user.Uid = userDto.Uid;
-        if (userDto.Nickname != null) user.Nickname = userDto.Nickname;
-        if (userDto.Email != null) user.Email = userDto.Email;
-        if (userDto.AvatarUrl != null) user.AvatarUrl = userDto.AvatarUrl;
-        if (userDto.Gender != null) user.Gender = userDto.Gender.ParseByDescription<Gender>();
-        if (userDto.Status != null) user.Status = userDto.Status.ParseByDescription<UserStatus>();
-        if (userDto.DateOfBirth != null) user.DateOfBirth = userDto.DateOfBirth.Value;
+        user.UpdateFromDto(userDto);
         await userRepository.SaveChangesAsync(ct);
-        return mapper.Map<UserDTO>(user);
+        return user.ToUserDto();
     }
 
     public async Task DeleteAsync(Guid id, CancellationToken ct)
@@ -54,10 +46,10 @@ public class UserManager(IUserRepository userRepository, IMapper mapper, ILogger
     }
 
     public async Task<UserDTO> GetAsync(Guid id, CancellationToken ct) =>
-        mapper.Map<UserDTO>(await GetUserAsync(id, ct));
+        (await GetUserAsync(id, ct)).ToUserDto();
 
     public async Task<ShortUserDTO> GetShortAsync(Guid id, CancellationToken ct) =>
-        mapper.Map<ShortUserDTO>(await GetUserAsync(id, ct));
+        (await GetUserAsync(id, ct)).ToShortUserDto();
 
     private async Task<User> GetUserAsync(Guid id, CancellationToken ct)
     {
@@ -78,7 +70,7 @@ public class UserManager(IUserRepository userRepository, IMapper mapper, ILogger
             logger.LogWarning($"UserManager(GetByUid): User with Uid {Sanitizer.Sanitize(uid)} not found");
             throw new UserServiceException("Такого пользователя не существует.", 404);
         }
-        return mapper.Map<ShortUserDTO>(user);
+        return user.ToShortUserDto();
     }
 
     public async Task<PagedUsersMainDTO> GetByNickNameAsync(string nickname, int offset, int limit,
@@ -86,7 +78,7 @@ public class UserManager(IUserRepository userRepository, IMapper mapper, ILogger
     {
         ValidatePagination(offset, limit);
         var (users, total) = await userRepository.GetByNicknameAsync(nickname, offset, limit, ct);
-        var usersDto = users.Select(user => mapper.Map<ShortUserDTO>(user));
+        var usersDto = users.Select(user => user.ToShortUserDto());
         return new PagedUsersMainDTO(usersDto, offset, limit,total);
     }
 
@@ -94,7 +86,7 @@ public class UserManager(IUserRepository userRepository, IMapper mapper, ILogger
     {
         ValidatePagination(offset, limit);
         var (users, total) = await userRepository.GetAllAsync(offset, limit, ct);
-        var shortUserDtos = users.Select(user => mapper.Map<ShortUserDTO>(user));
+        var shortUserDtos = users.Select(user => user.ToShortUserDto());
         return new PagedUsersMainDTO(shortUserDtos, offset, limit, total);
     }
     

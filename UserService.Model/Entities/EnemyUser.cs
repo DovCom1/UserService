@@ -6,4 +6,12 @@ public class EnemyUser
     public User User { get; set; }
     public Guid EnemyId { get; set; }
     public User Enemy  { get; set; }
+
+    private EnemyUser() { }
+
+    public EnemyUser(Guid userId, Guid enemyId)
+    {
+        UserId = userId;
+        EnemyId = enemyId;
+    }
 }

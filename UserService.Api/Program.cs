@@ -1,25 +1,36 @@
-﻿using Microsoft.AspNetCore.Diagnostics;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using UserService.Api.Middleware;
 using UserService.Contract.Managers;
 using UserService.Contract.Repositories;
+using UserService.Contract.Services;
 using UserService.Data.Core;
 using UserService.Data.Repositories;
-using UserService.Model.Mappers;
-using UserService.Service;
+using UserService.Service.Managers;
+using UserService.Service.Request;
+using UserService.Service.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddDbContext<DataBaseContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-builder.Services.AddAutoMapper(cfg =>
-{
-    cfg.AddProfile<DtoMapper>();
-});
-
 builder.Services.AddControllers();
+
+builder.Services.Configure<RequestDomains>(builder.Configuration.GetSection("RequestDomains"));
+
+builder.Services.AddSingleton<RequestFactory>();
+builder.Services.AddHttpClient();
+
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IFriendRepository, FriendRepository>();
+builder.Services.AddScoped<IEnemyRepository, EnemyRepository>();
+
+builder.Services.AddScoped<IUserManager, UserManager>();
+builder.Services.AddScoped<IFriendManager, FriendManager>();
+builder.Services.AddScoped<IEnemyManager, EnemyManager>();
+
+builder.Services.AddScoped<INotifierService, NotifierService>();
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
@@ -31,14 +42,6 @@ builder.Services.AddSwaggerGen(c =>
         Description = "API для работы с User Service"
     });
 });
-
-builder.Services.AddScoped<IUserRepository, UserRepository>();
-builder.Services.AddScoped<IFriendRepository, FriendRepository>();
-builder.Services.AddScoped<IEnemyRepository, EnemyRepository>();
-
-builder.Services.AddScoped<IUserManager, UserManager>();
-builder.Services.AddScoped<IFriendManager, FriendManager>();
-builder.Services.AddScoped<IEnemyManager, EnemyManager>();
 
 var app = builder.Build();
 

@@ -35,10 +35,5 @@ public class FriendUserConfiguration : IEntityTypeConfiguration<FriendUser>
             .WithMany(u => u.Friends)
             .HasForeignKey(f => f.UserId) 
             .OnDelete(DeleteBehavior.Cascade);
-        
-        // builder.HasOne(f => f.Friend)
-        //     .WithMany(u => u.Friends)
-        //     .HasForeignKey(f => f.FriendId)
-        //     .OnDelete(DeleteBehavior.Cascade);
     }
 }

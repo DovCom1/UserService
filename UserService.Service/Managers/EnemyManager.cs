@@ -1,17 +1,14 @@
-﻿using AutoMapper;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using UserService.Contract.Managers;
 using UserService.Contract.Repositories;
 using UserService.Model.DTO.EnemyUser;
 using UserService.Model.DTO.FriendUser;
-using UserService.Model.DTO.User;
-using UserService.Model.Entities;
 using UserService.Model.Exceptions;
-using UserService.Model.Utilities;
+using UserService.Service.Extensions;
 
-namespace UserService.Service;
+namespace UserService.Service.Managers;
 
-public class EnemyManager(IEnemyRepository enemyRepository, IUserManager userManager, IFriendManager friendManager, IMapper mapper, ILogger<EnemyManager> logger) : IEnemyManager
+public class EnemyManager(IEnemyRepository enemyRepository, IUserManager userManager, IFriendManager friendManager, ILogger<EnemyManager> logger) : IEnemyManager
 {
     public async Task<EnemyUserDTO> AddAsync(CreateEnemyUserDTO enemyUserDto, CancellationToken ct)
     {
@@ -30,9 +27,9 @@ public class EnemyManager(IEnemyRepository enemyRepository, IUserManager userMan
             logger.LogWarning($"EnemyManager(Add): Enemy relationship between {enemyUserDto.UserId} and {enemyUserDto.EnemyId} already exists");
             throw new UserServiceException("Пользователь уже находится в списке врагов", 409);
         }
-        var enemy = await enemyRepository.AddAsync(mapper.Map<EnemyUser>(enemyUserDto), ct);
+        var enemy = await enemyRepository.AddAsync(enemyUserDto.ToEnemyUser(), ct);
         logger.LogInformation($"User with Id {enemyUserDto.UserId} successfully added User with Id {enemyUserDto.EnemyId} to enemy");
-        return mapper.Map<EnemyUserDTO>(enemy);
+        return enemy.ToEnemyUserDto();
     }
 
     public async Task<bool> IsEnemy(Guid userId, Guid enemyId, CancellationToken ct)
@@ -46,7 +43,7 @@ public class EnemyManager(IEnemyRepository enemyRepository, IUserManager userMan
     {
         await userManager.ExistsAsync(enemyUserDto.UserId, ct);
         await userManager.ExistsAsync(enemyUserDto.EnemyId, ct);
-        if (!await enemyRepository.DeleteAsync(mapper.Map<EnemyUser>(enemyUserDto), ct))
+        if (!await enemyRepository.DeleteAsync(enemyUserDto.ToEnemyUser(), ct))
         {
             logger.LogWarning($"EnemyManager(Delete): Enemy relationship with UserId {enemyUserDto.UserId} and EnemyId {enemyUserDto.EnemyId} not found");
             throw new UserServiceException("Пользователь не находится в списке ваших врагов", 404);
@@ -60,13 +57,7 @@ public class EnemyManager(IEnemyRepository enemyRepository, IUserManager userMan
         ValidatePagination(offset, limit);
         await userManager.ExistsAsync(userId, ct);
         var (enemies, total) = await enemyRepository.GetEnemiesAsync(userId, offset, limit, ct);
-        var data = enemies.Select(enemy => new ShortUserDTO(
-            Id: enemy.Id,
-            Uid: enemy.Uid,
-            Nickname: enemy.Nickname,
-            AvatarUrl: enemy.AvatarUrl,
-            Status: enemy.Status.GetDescription()
-        )).ToList();
+        var data = enemies.Select(enemy => enemy.ToShortUserDto()).ToList();
         return new PagedEnemyResponseDTO(data, offset, limit, total);
     }
     

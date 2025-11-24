@@ -34,8 +34,7 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
         
         builder.Property(u => u.AvatarUrl)
             .HasColumnName("avatar_url")
-            .HasMaxLength(255)
-            .HasDefaultValue("");
+            .HasMaxLength(255);
 
         builder.Property(u => u.Gender)
             .HasColumnName("gender")
@@ -74,20 +73,10 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
             .WithOne(f => f.User)
             .HasForeignKey(f => f.UserId)
             .OnDelete(DeleteBehavior.Cascade);
-        
-        // builder.HasMany(u => u.Friends)
-        //     .WithOne(f => f.Friend)
-        //     .HasForeignKey(f => f.FriendId)
-        //     .OnDelete(DeleteBehavior.Cascade);
 
         builder.HasMany(u => u.Enemies)
             .WithOne(e => e.User)
             .HasForeignKey(e => e.UserId)
             .OnDelete(DeleteBehavior.Cascade);
-        
-        // builder.HasMany(u => u.Enemies)
-        //     .WithOne(e => e.Enemy)
-        //     .HasForeignKey(e => e.EnemyId)
-        //     .OnDelete(DeleteBehavior.Cascade);
     }
 }

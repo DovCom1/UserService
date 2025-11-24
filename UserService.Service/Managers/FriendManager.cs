@@ -2,16 +2,19 @@
 using Microsoft.Extensions.Logging;
 using UserService.Contract.Managers;
 using UserService.Contract.Repositories;
+using UserService.Contract.Services;
 using UserService.Model.DTO.EnemyUser;
 using UserService.Model.DTO.FriendUser;
+using UserService.Model.DTO.Notify;
 using UserService.Model.DTO.User;
 using UserService.Model.Entities;
 using UserService.Model.Exceptions;
 using UserService.Model.Utilities;
+using UserService.Service.Extensions;
 
-namespace UserService.Service;
+namespace UserService.Service.Managers;
 
-public class FriendManager(IFriendRepository friendRepository, IUserManager userManager, IEnemyRepository enemyRepository, IMapper mapper, ILogger<FriendManager> logger) : IFriendManager
+public class FriendManager(INotifierService notifierService, IFriendRepository friendRepository, IUserManager userManager, IEnemyRepository enemyRepository, ILogger<FriendManager> logger) : IFriendManager
 {
     public async Task<FriendUserDTO> SendRequestAsync(CreateFriendUserDTO friendUserDto, CancellationToken ct)
     {
@@ -25,7 +28,7 @@ public class FriendManager(IFriendRepository friendRepository, IUserManager user
         if (await enemyRepository.IsEnemy(friendUserDto.UserId, friendUserDto.FriendId, ct))
         {
             var dto = new EnemyUserDTO(friendUserDto.UserId, friendUserDto.FriendId);
-            await enemyRepository.DeleteAsync(mapper.Map<EnemyUser>(dto), ct);
+            await enemyRepository.DeleteAsync(dto.ToEnemyUser(), ct);
         }
         if (await friendRepository.IsPendingOrAccepted(friendUserDto.UserId, friendUserDto.FriendId, ct))
         {
@@ -38,9 +41,11 @@ public class FriendManager(IFriendRepository friendRepository, IUserManager user
                 $"FriendManager(Add): Cannot send friend request from user {friendUserDto.UserId} to {friendUserDto.FriendId} — target user has added sender to enemies list");
             throw new UserServiceException("Невозможно отправить заявку: вы находитель в списке врагов пользователя.", 403);
         }
-        var friend = await friendRepository.AddAsync(mapper.Map<FriendUser>(friendUserDto), ct);
+        var friend = await friendRepository.AddAsync(friendUserDto.ToFriendUser(), ct);
         logger.LogInformation($"User with Id {friendUserDto.UserId} successfully sent friend request to User with Id {friendUserDto.FriendId}");
-        return mapper.Map<FriendUserDTO>(friend);
+        var notifyBody = new FriendRequestDTO(friend.UserId, friend.FriendId, friend.User.Nickname, friend.Friend.Nickname, DateTime.Now);
+        await notifierService.NotifySendFriendRequestAsync(notifyBody, ct);
+        return friend.ToFriendUserDto();
     }
 
     public async Task<FriendUserDTO> AcceptFriendRequestAsync(UpdateFriendUserDTO friendUserDto, CancellationToken ct)
@@ -48,21 +53,21 @@ public class FriendManager(IFriendRepository friendRepository, IUserManager user
         await userManager.ExistsAsync(friendUserDto.UserId, ct);
         await userManager.ExistsAsync(friendUserDto.FriendId, ct);
         friendUserDto = new UpdateFriendUserDTO(UserId: friendUserDto.FriendId, FriendId: friendUserDto.UserId, Status: friendUserDto.Status);
-        var friendUser = await friendRepository.UpdateAsync(mapper.Map<FriendUser>(friendUserDto), ct);
+        var friendUser = await friendRepository.UpdateAsync(friendUserDto.ToFriendUser(), ct);
         if (friendUser == null)
         {
             logger.LogWarning($"FriendManager(Update): Friend relationship with UserId {friendUserDto.UserId} and FriendId {friendUserDto.FriendId} not found");
             throw new UserServiceException("Этой заявки в друзья не существует", 404);
         }
         logger.LogInformation($"User with Id {friendUserDto.FriendId} successfully accepted friend request from User with Id {friendUserDto.UserId}");
-        return mapper.Map<FriendUserDTO>(friendUser);
+        return friendUser.ToFriendUserDto();
     }
 
     public async Task RejectFriendRequestAsync(DeleteFriendUserDTO friendUserDto, CancellationToken ct)
     {
         await userManager.ExistsAsync(friendUserDto.UserId, ct);
         await userManager.ExistsAsync(friendUserDto.FriendId, ct);
-        if (!await friendRepository.DeleteAsync(mapper.Map<FriendUser>(friendUserDto), ct))
+        if (!await friendRepository.DeleteAsync(friendUserDto.ToFriendUser(), ct))
         {
             logger.LogWarning($"FriendManager(RejectFriendRequest): Friend request from User with Id {friendUserDto.FriendId} to User with Id {friendUserDto.UserId} not found");
             throw new UserServiceException("Такой заявки не существует", 404);
@@ -74,7 +79,7 @@ public class FriendManager(IFriendRepository friendRepository, IUserManager user
     {
         await userManager.ExistsAsync(friendUserDto.UserId, ct);
         await userManager.ExistsAsync(friendUserDto.FriendId, ct);
-        if (!await friendRepository.DeleteAsync(mapper.Map<FriendUser>(friendUserDto), ct))
+        if (!await friendRepository.DeleteAsync(friendUserDto.ToFriendUser(), ct))
         {
             logger.LogWarning($"FriendManager(Delete): Friend relationship with UserId {friendUserDto.UserId} and FriendId {friendUserDto.FriendId} not found");
             throw new UserServiceException("Пользователь не находится в списке ваших друзей", 404);
@@ -101,13 +106,7 @@ public class FriendManager(IFriendRepository friendRepository, IUserManager user
         ValidatePagination(offset, limit);
         await userManager.ExistsAsync(userId, ct);
         var (friends, total) = await friendRepository.GetFriendsAsync(userId, offset, limit, ct);
-        var data = friends.Select(friend => new ShortUserDTO(
-            Id: friend.Id,
-            Uid: friend.Uid,
-            Nickname: friend.Nickname,
-            AvatarUrl: friend.AvatarUrl,
-            Status: friend.Status.GetDescription()
-        )).ToList();
+        var data = friends.Select(friend => friend.ToShortUserDto()).ToList();
         return new PagedFriendResponseDTO(data, offset, limit, total);
     }
     
@@ -116,13 +115,7 @@ public class FriendManager(IFriendRepository friendRepository, IUserManager user
         ValidatePagination(offset, limit);
         await userManager.ExistsAsync(userId, ct);
         var (friends, total) = await friendRepository.GetIncomingRequestsAsync(userId, offset, limit, ct);
-        var data = friends.Select(friend => new ShortUserDTO(
-            Id: friend.Id,
-            Uid: friend.Uid,
-            Nickname: friend.Nickname,
-            AvatarUrl: friend.AvatarUrl,
-            Status: friend.Status.GetDescription()
-        )).ToList();
+        var data = friends.Select(friend => friend.ToShortUserDto()).ToList();
         return new PagedFriendResponseDTO(data, offset, limit, total);
     }
     
@@ -131,13 +124,7 @@ public class FriendManager(IFriendRepository friendRepository, IUserManager user
         ValidatePagination(offset, limit);
         await userManager.ExistsAsync(userId, ct);
         var (friends, total) = await friendRepository.GetOutcomingRequestsAsync(userId, offset, limit, ct);
-        var data = friends.Select(friend => new ShortUserDTO(
-            Id: friend.Id,
-            Uid: friend.Uid,
-            Nickname: friend.Nickname,
-            AvatarUrl: friend.AvatarUrl,
-            Status: friend.Status.GetDescription()
-        )).ToList();
+        var data = friends.Select(friend => friend.ToShortUserDto()).ToList();
         return new PagedFriendResponseDTO(data, offset, limit, total);
     }
     
