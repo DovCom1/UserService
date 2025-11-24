@@ -12,6 +12,9 @@ env:
 jobs:
     build-and-push:
         runs-on: ubuntu-latest
+        permissions:
+          contents: read
+          packages: write
 
         steps:
             - name: Checkout code
@@ -32,12 +35,21 @@ jobs:
               
             - name: Set up Docker Compose  
               uses: docker/setup-compose-action@v1
-              
-            - name: Build and push with Buildx via Compose
-              run: |
-                # Используем buildx через DOCKER_BUILDKIT
-                DOCKER_BUILDKIT=1 docker compose build
-                docker compose push
+                
+            - name: Extract metadata (tags, labels) for Docker
+              id: meta
+              uses: docker/metadata-action@9ec57ed1fcdbf14dcef7dfbe97b2010124a938b7
+              with:
+                images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+            
+            - name: Build and push Docker image
+              uses: docker/build-push-action@v6
+              with:
+                context: .
+                push: true
+                tags: ${{ steps.meta.outputs.tags }}
+                labels: ${{ steps.meta.outputs.labels }}
+                
     release:
       needs: build-and-push
       runs-on: ubuntu-latest
