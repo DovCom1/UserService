@@ -205,7 +205,8 @@ jobs:
           remote-password: ${{ secrets.SFTP_PASSWORD }}
 
           # Path for specific folder on server for files deployment
-          remote-path: /test.net/deploy-test
+          remote-path: ${{ secrets.REMOTE_PATH }}
+          sync: full
 
           # Port for SFTP access to server
           remote-port: 22
