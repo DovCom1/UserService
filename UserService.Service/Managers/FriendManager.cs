@@ -41,11 +41,13 @@ public class FriendManager(INotifierService notifierService, IFriendRepository f
                 $"FriendManager(Add): Cannot send friend request from user {friendUserDto.UserId} to {friendUserDto.FriendId} — target user has added sender to enemies list");
             throw new UserServiceException("Невозможно отправить заявку: вы находитель в списке врагов пользователя.", 403);
         }
-        var friend = await friendRepository.AddAsync(friendUserDto.ToFriendUser(), ct);
+        var friendUser = await friendRepository.AddAsync(friendUserDto.ToFriendUser(), ct);
+        var user = await userManager.GetAsync(friendUser.UserId, ct);
+        var friend = await userManager.GetAsync(friendUser.FriendId, ct);
         logger.LogInformation($"User with Id {friendUserDto.UserId} successfully sent friend request to User with Id {friendUserDto.FriendId}");
-        var notifyBody = new FriendRequestDTO(friend.UserId, friend.FriendId, friend.User.Nickname, friend.Friend.Nickname, DateTime.Now);
+        var notifyBody = new FriendRequestDTO(friendUser.UserId, friendUser.FriendId, user.Nickname, friend.Nickname, DateTime.Now);
         await notifierService.NotifySendFriendRequestAsync(notifyBody, ct);
-        return friend.ToFriendUserDto();
+        return friendUser.ToFriendUserDto();
     }
 
     public async Task<FriendUserDTO> AcceptFriendRequestAsync(UpdateFriendUserDTO friendUserDto, CancellationToken ct)
