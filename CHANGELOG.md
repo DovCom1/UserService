@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.1.0](https://github.com/DovCom1/UserService/compare/v1.0.0...v1.1.0) (2025-12-23)
+
+
+### Features
+
+* **core:** integrate notification service and replace dto mapper ([b9ff193](https://github.com/DovCom1/UserService/commit/b9ff1937602282bf0d3741319a68b55d429a36be))
+* **core:** integrate notification service and replace dto mapper ([888b1ae](https://github.com/DovCom1/UserService/commit/888b1ae95758da17cc63e682aa8a4993fd08ce8d))
+
 ## 1.0.0 (2025-11-24)
 
 
